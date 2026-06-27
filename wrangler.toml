@@ -5,7 +5,7 @@ compatibility_date = "2026-06-25"
 [[d1_databases]]
 binding = "DB" # Harus sama dengan env.DB di kode
 database_name = "lms"
-database_id = "PASTE_DATABASE_ID_YANG_ANDA_SALIN_TADI"
+database_id = "35d6e2cc-266a-4d2d-b15b-7f02525431a4"
 
 [vars]
 JWT_SECRET = "rahasia-lms-super-aman-2026"

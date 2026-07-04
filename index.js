@@ -6,7 +6,6 @@ const jsonResponse = (data, status = 200) => {
     status,
     headers: { 
       'Content-Type': 'application/json',
-      // Tambahkan headers CORS agar frontend bisa mengakses API ini
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
@@ -65,12 +64,29 @@ const ArticleModel = {
   }
 };
 
+// --- TAMBAHAN BARU: Model Operasi Database untuk Ujian ---
+const ExamModel = {
+  async getAll(db) {
+    const { results } = await db.prepare("SELECT * FROM exams ORDER BY created_at DESC").all();
+    // Karena kolom questions disimpan sebagai string JSON, kita harus memparsingnya kembali menjadi array/object sebelum dikirim ke frontend
+    return results.map(row => ({
+      ...row,
+      questions: JSON.parse(row.questions)
+    }));
+  },
+  async create(db, { id, title, description, duration, questions }) {
+    await db.prepare("INSERT INTO exams (id, title, description, duration, questions) VALUES (?, ?, ?, ?, ?)")
+      .bind(id, title, description, duration, JSON.stringify(questions))
+      .run();
+  }
+};
+
 // ==========================================
 // 4. ROUTER & HANDLERS (Scalable)
 // ==========================================
 export default {
   async fetch(request, env, ctx) {
-    // --- TAMBAHAN: Penanganan Preflight Request (OPTIONS) ---
+    // --- Penanganan Preflight Request (OPTIONS) ---
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -97,16 +113,15 @@ export default {
     }
 
     try {
-      // Routing untuk Resource: Articles (/api/articles)
+      // --------------------------------------------------
+      // ROUTING RESOURCE: ARTICLES (/api/articles)
+      // --------------------------------------------------
       if (path === "/api/articles") {
-        
-        // READ ALL
         if (method === "GET") {
           const articles = await ArticleModel.getAll(db);
           return jsonResponse({ success: true, data: articles });
         }
 
-        // CREATE
         if (method === "POST") {
           const body = await request.json();
           if (!body.title || !body.content) {
@@ -125,19 +140,16 @@ export default {
         }
       }
 
-      // Routing untuk Resource dengan ID (/api/articles/:id)
       if (path.startsWith("/api/articles/")) {
         const id = path.split("/")[3];
         if (!id) return jsonResponse({ error: "Invalid ID" }, 400);
 
-        // READ SINGLE
         if (method === "GET") {
           const article = await ArticleModel.getById(db, id);
           if (!article) return jsonResponse({ error: "Article not found" }, 404);
           return jsonResponse({ success: true, data: article });
         }
 
-        // UPDATE
         if (method === "PUT") {
           const body = await request.json();
           const article = await ArticleModel.getById(db, id);
@@ -147,11 +159,9 @@ export default {
             title: body.title || article.title,
             content: body.content || article.content
           });
-
           return jsonResponse({ success: true, message: "Article updated" });
         }
 
-        // DELETE
         if (method === "DELETE") {
           const article = await ArticleModel.getById(db, id);
           if (!article) return jsonResponse({ error: "Article not found" }, 404);
@@ -161,7 +171,39 @@ export default {
         }
       }
 
-      // 404 Not Found
+      // --------------------------------------------------
+      // TAMBAHAN BARU: ROUTING RESOURCE EXAMS (/api/exams)
+      // --------------------------------------------------
+      if (path === "/api/exams") {
+        // AMBIL SEMUA DATA UJIAN (GET)
+        if (method === "GET") {
+          const exams = await ExamModel.getAll(db);
+          return jsonResponse({ success: true, data: exams });
+        }
+
+        // SIMPAN UJIAN BARU (POST)
+        if (method === "POST") {
+          const body = await request.json();
+          
+          // Validasi input minimal
+          if (!body.title || !body.duration || !body.questions) {
+            return jsonResponse({ error: "Missing title, duration, or questions" }, 400);
+          }
+
+          const newExam = {
+            id: body.id || "exam-" + Date.now(),
+            title: body.title,
+            description: body.description || "",
+            duration: parseInt(body.duration),
+            questions: body.questions // Berupa array object dari frontend/postman
+          };
+
+          await ExamModel.create(db, newExam);
+          return jsonResponse({ success: true, message: "Exam created successfully!", data: newExam }, 201);
+        }
+      }
+
+      // 404 Not Found jika rute tidak cocok
       return jsonResponse({ error: "Endpoint not found" }, 404);
 
     } catch (error) {

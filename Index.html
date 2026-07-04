@@ -1,316 +1,547 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPulse - Dashboard Kelompok & Ujian</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>EduPulse · Jurnal & Ujian Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Plus Jakarta Sans", "Inter", "sans-serif"],
+            },
+            colors: {
+              surface: {
+                900: "#0b0f19",
+                800: "#151b2c",
+                700: "#222b44",
+              },
+            },
           },
-          colors: {
-            surface: {
-              900: '#090d16',
-              800: '#111827',
-              700: '#1f2937'
+        },
+      };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet" />
+    <style>
+      .serif-title { font-family: "Playfair Display", Georgia, serif; }
+      * { transition: all 0.2s ease-in-out; }
+      ::-webkit-scrollbar { width: 5px; }
+      ::-webkit-scrollbar-track { background: #0b0f19; }
+      ::-webkit-scrollbar-thumb { background: #222b44; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #334155; }
+      @keyframes pulse-warning {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+      .timer-warning { animation: pulse-warning 0.8s ease-in-out infinite; }
+    </style>
+  </head>
+  <body class="bg-surface-900 text-slate-200 min-h-screen flex flex-col justify-between selection:bg-sky-500/30">
+    
+    <!-- NAVIGASI -->
+    <nav class="border-b border-slate-800/80 bg-surface-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+      <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <a href="#" class="flex items-center gap-2.5 group">
+          <span class="h-9 w-9 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 group-hover:scale-105">E</span>
+          <span class="text-lg font-bold tracking-tight text-white">Edu<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Pulse.</span></span>
+        </a>
+        <div class="flex items-center gap-3">
+          <button onclick="bukaModalTambah()" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-md active:scale-95">✍️ Tulis Artikel</button>
+          <button onclick="bukaModalBuatUjian()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-md active:scale-95">📝 Buat Ujian</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="relative overflow-hidden border-b border-slate-800/50 bg-gradient-to-b from-blue-950/20 to-transparent py-12 px-6">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.08),transparent_45%)]"></div>
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+        <span class="text-xs font-bold tracking-widest text-cyan-400 uppercase bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">Ruang Baca & Evaluasi</span>
+        <h1 class="serif-title text-3xl md:text-4xl text-white font-semibold mt-4 mb-4 tracking-tight">Temukan materi, ujian interaktif, & lacak progres belajarmu.</h1>
+      </div>
+    </header>
+
+    <!-- TAB SWITCHER -->
+    <div class="max-w-6xl mx-auto w-full px-6 pt-6 pb-2">
+      <div class="flex gap-1 bg-surface-800/60 p-1 rounded-2xl border border-slate-800/60 max-w-md mx-auto">
+        <button id="tab-artikel" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold tracking-wide bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-blue-500/15" onclick="switchTab('artikel')">📄 Artikel</button>
+        <button id="tab-ujian" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold tracking-wide text-slate-400 hover:text-white" onclick="switchTab('ujian')">📝 Ujian</button>
+        <button id="tab-riwayat" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold tracking-wide text-slate-400 hover:text-white" onclick="switchTab('riwayat')">📊 Riwayat</button>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-6xl mx-auto w-full px-6 py-6 flex-grow">
+      
+      <!-- SECTION ARTIKEL -->
+      <section id="section-artikel">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+          <div class="flex items-center gap-3">
+            <h2 class="text-sm font-semibold tracking-wider uppercase text-slate-400">Semua Publikasi</h2>
+            <span id="article-count" class="bg-slate-800 text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-medium border border-slate-700/60">0</span>
+          </div>
+          <button onclick="fetchArticles()" class="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 font-medium">🔄 Segarkan</button>
+        </div>
+        <div class="mb-4">
+          <input type="text" id="search-artikel" placeholder="🔍 Cari artikel..." class="w-full max-w-md bg-surface-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-400" />
+        </div>
+        <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </section>
+
+      <!-- SECTION UJIAN -->
+      <section id="section-ujian" class="hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+          <div class="flex items-center gap-3">
+            <h2 class="text-sm font-semibold tracking-wider uppercase text-slate-400">Bank Ujian Aktif</h2>
+            <span id="exam-count" class="bg-slate-800 text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-medium border border-slate-700/60">0</span>
+          </div>
+        </div>
+        <div id="exams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </section>
+
+      <!-- SECTION LIVE AREA KERJA UJIAN (RUANG UJIAN) -->
+      <section id="section-ruang-ujian" class="hidden max-w-3xl mx-auto bg-surface-800 border border-slate-700/80 rounded-2xl p-6 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
+          <div>
+            <h2 id="live-exam-title" class="text-lg font-bold text-white">Judul Ujian</h2>
+            <p id="live-exam-meta" class="text-xs text-slate-400 mt-0.5">Soal 1 dari 10</p>
+          </div>
+          <div id="live-exam-timer" class="bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono text-sm px-4 py-1.5 rounded-xl font-bold">00:00</div>
+        </div>
+        <div class="mb-6">
+          <div id="live-question-text" class="text-md text-white font-medium bg-surface-900 p-4 rounded-xl border border-slate-800 min-h-[80px]">Pertanyaan ujian akan muncul di sini...</div>
+        </div>
+        <div id="live-options-container" class="space-y-3 mb-8"></div>
+        <div class="flex justify-between items-center border-t border-slate-700/60 pt-4">
+          <button id="btn-prev-question" onclick="navigateQuestion(-1)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-white disabled:opacity-40">⬅️ Kembali</button>
+          <button id="btn-next-question" onclick="navigateQuestion(1)" class="px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-600 hover:bg-cyan-500 text-white">Selanjutnya ➡️</button>
+          <button id="btn-submit-exam" onclick="selesaiUjianDanHitung()" class="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white hidden">📥 Kumpulkan Ujian</button>
+        </div>
+      </section>
+
+      <!-- SECTION RIWAYAT -->
+      <section id="section-riwayat" class="hidden">
+        <div class="border-b border-slate-800 pb-4 mb-6">
+          <h2 class="text-sm font-semibold tracking-wider uppercase text-slate-400">Riwayat & Hasil Skor Anda</h2>
+        </div>
+        <div id="history-list" class="space-y-4 max-w-3xl mx-auto"></div>
+      </section>
+    </main>
+
+    <!-- MODAL TULIS ARTIKEL -->
+    <div id="modal-tulis" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-surface-800 border border-slate-700/60 w-full max-w-lg rounded-2xl shadow-2xl">
+        <div class="px-6 py-4 border-b border-slate-700/50 flex justify-between items-center">
+          <h3 class="text-md font-semibold text-white">Mulai Menulis Artikel</h3>
+          <button onclick="tutupModalTambah()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+        </div>
+        <div class="p-6 space-y-4">
+          <input type="text" id="input-title" placeholder="Judul artikel..." class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400" />
+          <textarea id="input-content" rows="5" placeholder="Tulis konten artikel di sini..." class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400 resize-none"></textarea>
+          <div class="flex justify-end gap-2">
+            <button onclick="tutupModalTambah()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-700/40">Batal</button>
+            <button onclick="simpanArtikelBaru()" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-xs px-5 py-2 rounded-xl">Terbitkan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL BUAT UJIAN BARU -->
+    <div id="modal-buat-ujian" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-surface-800 border border-slate-700/60 w-full max-w-2xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col">
+        <div class="px-6 py-4 border-b border-slate-700/50 flex justify-between items-center">
+          <h3 class="text-md font-semibold text-white">Panel Pembuatan Bank Ujian</h3>
+          <button onclick="tutupModalUjian()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+        </div>
+        <div class="p-6 space-y-4 flex-grow overflow-y-auto">
+          <div class="grid grid-cols-3 gap-4">
+            <div class="col-span-2">
+              <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Judul Ujian</label>
+              <input type="text" id="exam-title-input" placeholder="Contoh: Kuis Algoritma Pemrograman" class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase">Durasi (Menit)</label>
+              <input type="number" id="exam-duration-input" value="15" min="1" class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+            </div>
+          </div>
+          <div class="border-t border-slate-700/60 pt-4">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Form Input Butir Soal</h4>
+            <div class="bg-surface-900 p-4 rounded-xl border border-slate-700/50 space-y-3">
+              <input type="text" id="q-text" placeholder="Pertanyaan Soal..." class="w-full bg-surface-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="opt-a" placeholder="Opsi A" class="bg-surface-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none" />
+                <input type="text" id="opt-b" placeholder="Opsi B" class="bg-surface-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none" />
+                <input type="text" id="opt-c" placeholder="Opsi C" class="bg-surface-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none" />
+                <input type="text" id="opt-d" placeholder="Opsi D" class="bg-surface-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none" />
+              </div>
+              <div class="flex justify-between items-center pt-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-slate-400">Kunci Jawaban:</span>
+                  <select id="q-correct" class="bg-surface-800 border border-slate-700 rounded-md text-xs px-2 py-1 text-emerald-400 font-bold focus:outline-none">
+                    <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+                  </select>
+                </div>
+                <button onclick="tambahSoalKeList()" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white">➕ Tambah Soal</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">Daftar Soal Sementara (<span id="temp-q-count">0</span>)</h4>
+            <div id="temp-questions-list" class="space-y-2 max-h-[150px] overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-slate-700/50 flex justify-end gap-2 bg-surface-900/20">
+          <button onclick="tutupModalUjian()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-700/40">Batal</button>
+          <button onclick="simpanUjianKeStorage()" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-xs px-5 py-2 rounded-xl shadow-lg">💾 Simpan & Rilis Ujian</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST ALERT -->
+    <div id="toast" class="fixed bottom-6 right-6 z-[80] bg-surface-800 border border-slate-700 rounded-xl px-5 py-3 shadow-2xl text-sm text-white font-medium opacity-0 translate-y-4 pointer-events-none transition-all duration-300">
+      <span id="toast-message">Pesan</span>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800/80 bg-surface-800/20 py-4 px-6 text-center text-xs text-slate-500">
+      <p>&copy; 2026 EduPulse · Pengalaman membaca & ujian profesional</p>
+    </footer>
+
+    <!-- INTERACTIVE JAVASCRIPT SYSTEM -->
+    <script>
+      (function () {
+        const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+          ? "https://lms.agungbarliansaputra.workers.dev/api/articles"
+          : "/api/articles"; 
+
+        const JWT_TOKEN = localStorage.getItem("edupulse_jwt") || "";
+        const STORAGE_EXAMS = "edupulse_exams_v1";
+        const STORAGE_RESULTS = "edupulse_results_v1";
+
+        window.articlesData = [];
+        window.examsData = JSON.parse(localStorage.getItem(STORAGE_EXAMS)) || [];
+        window.resultsData = JSON.parse(localStorage.getItem(STORAGE_RESULTS)) || [];
+
+        // State Ruang Ujian Aktif
+        let currentExam = null;
+        let currentQuestionIdx = 0;
+        let selectedAnswers = {}; 
+        let examTimer = null;
+        let secondsLeft = 0;
+
+        // State Pembuatan Soal di Modal
+        let listSoalSementara = [];
+
+        function toast(msg) {
+          const el = document.getElementById("toast");
+          const msgEl = document.getElementById("toast-message");
+          if (!el || !msgEl) return;
+          msgEl.textContent = msg;
+          el.classList.remove("opacity-0", "translate-y-4", "pointer-events-none");
+          el.classList.add("opacity-100", "translate-y-0");
+          clearTimeout(window._toastTid);
+          window._toastTid = setTimeout(() => {
+            el.classList.add("opacity-0", "translate-y-4", "pointer-events-none");
+            el.classList.remove("opacity-100", "translate-y-0");
+          }, 2500);
+        }
+
+        function switchTab(tab) {
+          ["artikel", "ujian", "ruang-ujian", "riwayat"].forEach((t) => {
+            document.getElementById(`section-${t}`)?.classList.add("hidden");
+            const btn = document.getElementById(`tab-${t}`);
+            if (btn) {
+              btn.classList.remove("bg-gradient-to-r", "from-cyan-500", "to-blue-600", "from-emerald-500", "to-teal-600", "text-white", "shadow-md");
+              btn.classList.add("text-slate-400", "hover:text-white");
+            }
+          });
+
+          document.getElementById(`section-${tab}`)?.classList.remove("hidden");
+          const activeBtn = document.getElementById(`tab-${tab}`);
+          if (activeBtn) {
+            activeBtn.classList.remove("text-slate-400", "hover:text-white");
+            if (tab === "ujian" || tab === "ruang-ujian") {
+              activeBtn.classList.add("bg-gradient-to-r", "from-emerald-500", "to-teal-600", "text-white", "shadow-md");
+            } else {
+              activeBtn.classList.add("bg-gradient-to-r", "from-cyan-500", "to-blue-600", "text-white", "shadow-md");
             }
           }
+          if (tab === "artikel") renderArticles();
+          if (tab === "ujian") renderExams();
+          if (tab === "riwayat") renderHistory();
         }
-      }
-    }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-  <style>
-    .serif-title { font-family: 'Playfair Display', Georgia, serif; }
-    * { transition: all 0.2s ease-in-out; }
-  </style>
-</head>
-<body class="bg-surface-900 text-slate-200 min-h-screen flex flex-col justify-between selection:bg-indigo-500/30">
+        window.switchTab = switchTab;
 
-  <nav class="border-b border-slate-800 bg-surface-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <a href="#" class="flex items-center gap-2.5 group">
-        <span class="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg shadow-purple-500/20">
-          👥
-        </span>
-        <span class="text-lg font-bold tracking-tight text-white">EduPulse <span class="text-indigo-400 text-sm font-medium">Team Space</span></span>
-      </a>
-      
-      <div class="flex gap-3">
-        <a href="#section-ujian" class="border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-semibold px-4 py-2 rounded-full flex items-center">
-          📝 Menu Ujian
-        </a>
-        <button onclick="bukaModalTulis()" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-md active:scale-95">
-          ✍️ Tulis Artikel
-        </button>
-      </div>
-    </div>
-  </nav>
+        // ================== LOGIK ARTIKEL API ==================
+        async function fetchArticles() {
+          if (!JWT_TOKEN) {
+            toast("Token JWT kosong. Atur via localStorage 'edupulse_jwt'");
+            return renderArticles();
+          }
+          try {
+            const res = await fetch(API_URL, {
+              method: "GET",
+              headers: { "Authorization": `Bearer ${JWT_TOKEN}`, "Content-Type": "application/json" },
+            });
+            const json = await res.json();
+            if (json.success && json.data) window.articlesData = json.data;
+          } catch (e) {
+            console.error(e);
+          }
+          renderArticles();
+        }
+        window.fetchArticles = fetchArticles;
 
-  <header class="relative overflow-hidden border-b border-slate-800/50 bg-gradient-to-b from-indigo-950/20 to-transparent py-12 px-6 text-center">
-    <div class="max-w-3xl mx-auto">
-      <span class="text-xs font-bold tracking-widest text-indigo-400 uppercase bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Dashboard Kolaborasi</span>
-      <h1 class="serif-title text-3xl md:text-4xl text-white font-semibold mt-3 mb-4 tracking-tight">
-        Platform Belajar & Ujian Kelompok
-      </h1>
-      <p class="text-slate-400 text-sm max-w-xl mx-auto leading-relaxed">
-        Sistem LMS terintegrasi dengan Cloudflare D1. Dilengkapi ruang publikasi jurnal kuliah dan modul evaluasi ujian mandiri.
-      </p>
-    </div>
-  </header>
+        async function simpanArtikelBaru() {
+          const title = document.getElementById("input-title")?.value.trim();
+          const content = document.getElementById("input-content")?.value.trim();
+          if (!title || !content) return toast("Judul & Konten wajib diisi!");
 
-  <main class="max-w-6xl mx-auto w-full px-6 py-10 flex-grow space-y-16">
-    
-    <section id="section-artikel">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-8">
-        <div class="flex items-center gap-3">
-          <h2 class="text-xs font-semibold tracking-wider uppercase text-slate-400">Daftar Materi Kuliah</h2>
-          <span id="article-count" class="bg-slate-800 text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-medium">0</span>
-        </div>
-        <button onclick="loadArtikelKelompok()" class="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 font-medium">
-          🔄 Segarkan Materi
-        </button>
-      </div>
+          try {
+            const res = await fetch(API_URL, {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${JWT_TOKEN}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ title, content }),
+            });
+            const json = await res.json();
+            if (json.success) {
+              document.getElementById("input-title").value = "";
+              document.getElementById("input-content").value = "";
+              tutupModalTambah();
+              await fetchArticles();
+              toast("🎉 Artikel berhasil diterbitkan!");
+            }
+          } catch (e) {
+            toast("Gagal memproses ke server Cloudflare.");
+          }
+        }
+        window.simpanArtikelBaru = simpanArtikelBaru;
 
-      <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div id="loading-state" class="col-span-full text-center py-16 bg-slate-800/20 border border-slate-800 rounded-2xl">
-          <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-indigo-400 border-r-transparent mb-2"></div>
-          <p class="text-xs text-slate-400">Sinkronisasi repositori tim...</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="section-ujian" class="border-t border-slate-800 pt-12">
-      <div class="border-b border-slate-800 pb-4 mb-8">
-        <h2 class="text-xs font-semibold tracking-wider uppercase text-slate-400">📝 Modul Evaluasi & Ujian Online</h2>
-      </div>
-
-      <div class="bg-surface-800 p-6 md:p-8 rounded-2xl border border-slate-800 max-w-2xl mx-auto shadow-xl">
-        <div class="flex justify-between items-start mb-6">
-          <div>
-            <h3 class="text-base font-bold text-white">Ujian Singkat: Pemrograman Web (IP241)</h3>
-            <p class="text-xs text-slate-400 mt-1">Pilih satu jawaban yang paling tepat untuk menguji pemahaman bab ini.</p>
-          </div>
-          <span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">Wajib</span>
-        </div>
-
-        <form id="quiz-form" class="space-y-6">
-          <div class="bg-surface-900 p-4 rounded-xl border border-slate-700/50">
-            <label class="block text-xs font-bold text-indigo-400 mb-1.5 uppercase tracking-wider">Nama Lengkap Peserta Ujian</label>
-            <input type="text" id="quiz-student-name" required placeholder="Masukkan nama lengkap Anda..." 
-                   class="w-full bg-surface-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400">
-          </div>
-
-          <div class="space-y-2">
-            <p class="text-xs font-medium text-slate-300"><span class="text-indigo-400 font-bold">1.</span> Apa fungsi utama dari Method HTTP <span class="bg-slate-900 px-1 py-0.5 rounded font-mono text-pink-400">POST</span> pada pengujian via Postman?</p>
-            <div class="grid grid-cols-1 gap-2 text-xs text-slate-400 pl-4">
-              <label class="flex items-center gap-2.5 bg-surface-900/50 p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer"><input type="radio" name="q1" value="A" required class="accent-indigo-500"> A. Menghapus data permanen dari server database.</label>
-              <label class="flex items-center gap-2.5 bg-surface-900/50 p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer"><input type="radio" name="q1" value="B" class="accent-indigo-500"> B. Mengirim atau mengunggah data baru ke database server.</label>
-              <label class="flex items-center gap-2.5 bg-surface-900/50 p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer"><input type="radio" name="q1" value="C" class="accent-indigo-500"> C. Hanya membaca dan memanggil data tanpa mengubah isi server.</label>
+        function renderArticles() {
+          const grid = document.getElementById("articles-grid");
+          if (!grid) return;
+          const search = document.getElementById("search-artikel")?.value.toLowerCase() || "";
+          let data = window.articlesData.filter(a => a.title.toLowerCase().includes(search) || (a.content || "").toLowerCase().includes(search));
+          
+          document.getElementById("article-count").textContent = data.length;
+          if (data.length === 0) {
+            grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500">📭 Tidak ada materi artikel ditemukan.</div>`;
+            return;
+          }
+          grid.innerHTML = data.map(a => `<article class="bg-surface-800 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+            <div>
+              <h3 class="serif-title text-lg text-white font-medium mb-2">${a.title}</h3>
+              <p class="text-xs text-slate-400 line-clamp-4 leading-relaxed mb-4">${a.content}</p>
             </div>
-          </div>
+            <div class="text-[10px] text-slate-500 pt-2 border-t border-slate-700/40 flex justify-between"><span>📅 Modul LMS</span><span>By Admin</span></div>
+          </article>`).join("");
+        }
 
-          <div class="space-y-2">
-            <p class="text-xs font-medium text-slate-300"><span class="text-indigo-400 font-bold">2.</span> Di manakah data tulisan Anda disimpan saat menggunakan arsitektur Cloudflare Workers modern?</p>
-            <div class="grid grid-cols-1 gap-2 text-xs text-slate-400 pl-4">
-              <label class="flex items-center gap-2.5 bg-surface-900/50 p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer"><input type="radio" name="q2" value="A" required class="accent-indigo-500"> A. Cloudflare D1 Relational Database.</label>
-              <label class="flex items-center gap-2.5 bg-surface-900/50 p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer"><input type="radio" name="q2" value="B" class="accent-indigo-500"> B. Local Storage memori browser Chrome masing-masing.</label>
-              <label class="flex items-center gap-2.5 bg-surface-900/50 p-2.5 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer"><input type="radio" name="q2" value="C" class="accent-indigo-500"> C. File teks berekstensi .txt di dalam repositori komputer.</label>
-            </div>
-          </div>
+        // ================== LOGIK ENGINE MANAJEMEN UJIAN ==================
+        window.bukaModalBuatUjian = () => {
+          listSoalSementara = [];
+          document.getElementById("temp-questions-list").innerHTML = "";
+          document.getElementById("temp-q-count").textContent = "0";
+          document.getElementById("modal-buat-ujian")?.classList.remove("hidden");
+        };
+        window.tutupModalUjian = () => document.getElementById("modal-buat-ujian")?.classList.add("hidden");
+        window.bukaModalTambah = () => document.getElementById("modal-tulis")?.classList.remove("hidden");
+        window.tutupModalTambah = () => document.getElementById("modal-tulis")?.classList.add("hidden");
 
-          <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white text-xs font-semibold py-3 rounded-xl shadow-lg active:scale-95">
-            🚀 Kirim Lembar Jawaban Ujian
-          </button>
-        </form>
+        function tambahSoalKeList() {
+          const txt = document.getElementById("q-text").value.trim();
+          const a = document.getElementById("opt-a").value.trim();
+          const b = document.getElementById("opt-b").value.trim();
+          const c = document.getElementById("opt-c").value.trim();
+          const d = document.getElementById("opt-d").value.trim();
+          const correct = document.getElementById("q-correct").value;
 
-        <div id="quiz-result-box" class="hidden mt-6 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-center">
-          <p class="text-xs text-emerald-400 font-medium">🎉 Jawaban Berhasil Dikirim & Diperiksa Sistem!</p>
-          <h4 class="text-2xl font-bold text-white my-1" id="quiz-score-display">Skor: 0 / 100</h4>
-          <p class="text-[11px] text-slate-400" id="quiz-student-display">Nama Siswa: -</p>
-        </div>
-      </div>
-    </section>
-  </main>
+          if (!txt || !a || !b || !c || !d) return toast("Seluruh komponen butir soal wajib diisi!");
 
-  <div id="modal-tulis" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-surface-800 border border-slate-700/50 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden scale-95" id="modal-content">
-      <div class="px-6 py-4 border-b border-slate-700/50 flex justify-between items-center">
-        <h3 class="text-sm font-semibold text-white">Buat Kontribusi Baru</h3>
-        <button onclick="tutupModalTulis()" class="text-slate-400 hover:text-white text-xl">&times;</button>
-      </div>
-      <div class="p-6 space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Nama Penulis / Anggota</label>
-          <input type="text" id="input-author" placeholder="Contoh: Kelompok 2 / Nama Anggota" 
-                 class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Judul Materi</label>
-          <input type="text" id="input-title" placeholder="Masukkan judul materi kuliah..." 
-                 class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Isi Pembahasan</label>
-          <textarea id="input-content" rows="5" placeholder="Tulis ringkasan tugas atau materi kelompok di sini..." 
-                    class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400 resize-none"></textarea>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button onclick="tutupModalTulis()" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-700/50">Batal</button>
-          <button onclick="submitArtikelKelompok()" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-xs px-5 py-2.5 rounded-xl">
-            Simpan ke Database
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+          listSoalSementara.push({ question: txt, options: { A: a, B: b, C: c, D: d }, answer: correct });
+          
+          document.getElementById("q-text").value = "";
+          document.getElementById("opt-a").value = ""; document.getElementById("opt-b").value = "";
+          document.getElementById("opt-c").value = ""; document.getElementById("opt-d").value = "";
+          
+          document.getElementById("temp-q-count").textContent = listSoalSementara.length;
+          document.getElementById("temp-questions-list").innerHTML = listSoalSementara.map((q, idx) => 
+            `<div class="bg-surface-900 p-2 rounded border border-slate-800 flex justify-between">
+              <span class="truncate pr-2">${idx + 1}. ${q.question}</span><span class="text-emerald-400 font-bold">(${q.answer})</span>
+             </div>`
+          ).join("");
+        }
+        window.tambahSoalKeList = tambahSoalKeList;
 
-  <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
-    <p>&copy; 2026 EduPulse Kelompok Space. Terintegrasi Cloudflare API & Webdev Tools Certified.</p>
-  </footer>
+        function simpanUjianKeStorage() {
+          const title = document.getElementById("exam-title-input").value.trim();
+          const duration = parseInt(document.getElementById("exam-duration-input").value) || 15;
 
-  <script>
-    // URL API Workers & Token JWT yang SAMA PERSIS
-    const API_URL = 'https://lms.agungbarliansaputra.workers.dev/api/articles';
-    const JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.QMUFsIDTnFmyG3nMiGM6SDlOWk5GTlVSR0Yzd2g3U21xSnAtUXYzMA";
+          if (!title) return toast("Judul Evaluasi Ujian Utama harus ditentukan!");
+          if (listSoalSementara.length === 0) return toast("Minimal harus memasukkan 1 butir soal.");
 
-    function bukaModalTulis() {
-      document.getElementById('modal-tulis').classList.remove('hidden');
-      setTimeout(() => document.getElementById('modal-content').classList.remove('scale-95'), 10);
-    }
-    function tutupModalTulis() {
-      document.getElementById('modal-content').classList.add('scale-95');
-      setTimeout(() => document.getElementById('modal-tulis').classList.add('hidden'), 150);
-    }
+          const newExam = { id: "ex_" + Date.now(), title, duration, questions: listSoalSementara };
+          window.examsData.push(newExam);
+          localStorage.setItem(STORAGE_EXAMS, JSON.stringify(window.examsData));
+          
+          tutupModalUjian();
+          toast("🚀 Bank Ujian Baru Berhasil Dirilis!");
+          renderExams();
+        }
+        window.simpanUjianKeStorage = simpanUjianKeStorage;
 
-    // 1. GET DATA: Mengambil data materi dari database D1
-    async function loadArtikelKelompok() {
-      const grid = document.getElementById('articles-grid');
-      const countBadge = document.getElementById('article-count');
-      
-      try {
-        const response = await fetch(API_URL, {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
-        });
-        const result = await response.json();
-
-        if (result.success && result.data) {
-          grid.innerHTML = '';
-          countBadge.innerText = result.data.length;
-
-          if (result.data.length === 0) {
-            grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 border border-dashed border-slate-800 rounded-2xl">📭 Belum ada materi kelompok yang diunggah.</div>`;
+        function renderExams() {
+          const grid = document.getElementById("exams-grid");
+          if (!grid) return;
+          
+          document.getElementById("exam-count").textContent = window.examsData.length;
+          if (window.examsData.length === 0) {
+            grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500">📝 Belum ada berkas ujian. Klik 'Buat Ujian' di atas.</div>`;
             return;
           }
 
-          result.data.forEach((article, idx) => {
-            const date = article.created_at ? new Date(article.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja';
-            const colors = ['from-indigo-500 to-purple-600', 'from-purple-500 to-pink-500', 'from-blue-500 to-indigo-600'];
-            const chosenColor = colors[idx % colors.length];
-
-            const card = document.createElement('div');
-            card.className = "bg-surface-800 border border-slate-800 rounded-xl overflow-hidden shadow-md flex flex-col justify-between";
-            card.innerHTML = `
+          grid.innerHTML = window.examsData.map(ex => `
+            <div class="bg-surface-800 border border-slate-700/70 p-5 rounded-2xl shadow-xl flex flex-col justify-between">
               <div>
-                <div class="h-3 w-full bg-gradient-to-r ${chosenColor}"></div>
-                <div class="p-5">
-                  <div class="flex justify-between items-center text-[11px] text-slate-400 mb-2">
-                    <span class="text-indigo-400 font-medium">✍️ ${article.author || 'Anggota Tim'}</span>
-                    <span>${date}</span>
-                  </div>
-                  <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2">${article.title}</h3>
-                  <p class="text-xs text-slate-400 leading-relaxed line-clamp-4 whitespace-pre-line">${article.content}</p>
-                </div>
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">Waktu: ${ex.duration} Mnt</span>
+                <h3 class="text-base text-white font-semibold mt-2.5 mb-1">${ex.title}</h3>
+                <p class="text-xs text-slate-400 mb-4">Total kuantitas: ${ex.questions.length} butir pertanyaan pilihan ganda.</p>
               </div>
-              <div class="px-5 pb-5 pt-2 border-t border-slate-800/50 flex justify-end">
-                <button onclick="hapusArtikelKelompok('${article.id}')" class="text-[10px] text-rose-400 hover:underline">Hapus</button>
-              </div>
-            `;
-            grid.appendChild(card);
-          });
+              <button onclick="mulaiSesiUjianKerja('${ex.id}')" class="w-full text-center py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all">Mulai Ujian 🚀</button>
+            </div>
+          `).join("");
         }
-      } catch (e) {
-        grid.innerHTML = `<div class="col-span-full text-center py-6 text-rose-400 text-xs">⚠️ Gagal memuat database kelompok (Cek Webdev Tools Console).</div>`;
-      }
-    }
+        window.renderExams = renderExams;
 
-    // 2. POST DATA: Mengirim materi kelompok baru ke Cloudflare
-    async function submitArtikelKelompok() {
-      const author = document.getElementById('input-author').value.trim();
-      const title = document.getElementById('input-title').value.trim();
-      const content = document.getElementById('input-content').value.trim();
+        // ================== RUNTIME ENGINE RUANG UJIAN ==================
+        function mulaiSesiUjianKerja(id) {
+          const ex = window.examsData.find(e => e.id === id);
+          if (!ex) return;
 
-      if (!title || !content) {
-        alert("Judul dan isi tidak boleh kosong!");
-        return;
-      }
+          currentExam = ex;
+          currentQuestionIdx = 0;
+          selectedAnswers = {};
+          secondsLeft = ex.duration * 60;
 
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${JWT_TOKEN}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ title, content, author: author || 'Anggota Kelompok' })
-        });
+          switchTab("ruang-ujian");
+          document.getElementById("live-exam-title").textContent = currentExam.title;
+          
+          clearInterval(examTimer);
+          examTimer = setInterval(() => {
+            secondsLeft--;
+            if (secondsLeft <= 0) {
+              clearInterval(examTimer);
+              selesaiUjianDanHitung(true);
+            } else {
+              const m = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+              const s = (secondsLeft % 60).toString().padStart(2, '0');
+              const clock = document.getElementById("live-exam-timer");
+              if (clock) {
+                clock.textContent = `${m}:${s}`;
+                if (secondsLeft < 60) clock.classList.add("timer-warning");
+              }
+            }
+          }, 1000);
+
+          tampilkanButirSoal();
+        }
+        window.mulaiSesiUjianKerja = mulaiSesiUjianKerja;
+
+        function tampilkanButirSoal() {
+          if (!currentExam) return;
+          const q = currentExam.questions[currentQuestionIdx];
+          
+          document.getElementById("live-exam-meta").textContent = `Soal ${currentQuestionIdx + 1} dari ${currentExam.questions.length}`;
+          document.getElementById("live-question-text").textContent = q.question;
+
+          const optContainer = document.getElementById("live-options-container");
+          optContainer.innerHTML = Object.entries(q.options).map(([key, value]) => {
+            const isChecked = selectedAnswers[currentQuestionIdx] === key ? "checked" : "";
+            return `
+              <label class="flex items-center gap-3 bg-surface-900 border border-slate-800 p-3 rounded-xl cursor-pointer hover:border-slate-700 transition-all">
+                <input type="radio" name="answer-opt" value="${key}" ${isChecked} onchange="pilihJawabanUjian('${key}')" class="w-4 h-4 text-cyan-500 focus:ring-0" />
+                <span class="text-xs font-bold text-slate-400">${key}.</span>
+                <span class="text-xs text-slate-200">${value}</span>
+              </label>
+            `;
+          }).join("");
+
+          // Kontrol Tombol Navigasi
+          document.getElementById("btn-prev-question").disabled = (currentQuestionIdx === 0);
+          if (currentQuestionIdx === currentExam.questions.length - 1) {
+            document.getElementById("btn-next-question").classList.add("hidden");
+            document.getElementById("btn-submit-exam").classList.remove("hidden");
+          } else {
+            document.getElementById("btn-next-question").classList.remove("hidden");
+            document.getElementById("btn-submit-exam").classList.add("hidden");
+          }
+        }
+
+        window.pilihJawabanUjian = (key) => { selectedAnswers[currentQuestionIdx] = key; };
         
-        document.getElementById('input-author').value = '';
-        document.getElementById('input-title').value = '';
-        document.getElementById('input-content').value = '';
-        tutupModalTulis();
-        loadArtikelKelompok();
-      } catch (e) {
-        alert("Gagal menyimpan data ke database server.");
-      }
-    }
+        window.navigateQuestion = (dir) => {
+          currentQuestionIdx += dir;
+          tampilkanButirSoal();
+        };
 
-    // 3. DELETE DATA: Menghapus materi dari database
-    async function hapusArtikelKelompok(id) {
-      if (!confirm("Hapus kontribusi kelompok ini dari Cloudflare D1?")) return;
-      try {
-        await fetch(`${API_URL}/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+        function selesaiUjianDanHitung(forced = false) {
+          if (!forced && !confirm("Apakah Anda yakin ingin mengumpulkan lembar jawaban ujian sekarang?")) return;
+          clearInterval(examTimer);
+
+          let benar = 0;
+          currentExam.questions.forEach((q, idx) => {
+            if (selectedAnswers[idx] === q.answer) benar++;
+          });
+
+          const skorAkhir = Math.round((benar / currentExam.questions.length) * 100);
+          const report = {
+            id: "rep_" + Date.now(),
+            title: currentExam.title,
+            totalQuestions: currentExam.questions.length,
+            correctCount: benar,
+            score: skorAkhir,
+            date: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+          };
+
+          window.resultsData.unshift(report);
+          localStorage.setItem(STORAGE_RESULTS, JSON.stringify(window.resultsData));
+          
+          alert(`Ujian Selesai!\nSkor Akhir Anda: ${skorAkhir} / 100\nJawaban Benar: ${benar} dari ${currentExam.questions.length} Soal.`);
+          switchTab("riwayat");
+        }
+        window.selesaiUjianDanHitung = selesaiUjianDanHitung;
+
+        function renderHistory() {
+          const list = document.getElementById("history-list");
+          if (!list) return;
+
+          if (window.resultsData.length === 0) {
+            list.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">📊 Belum ada riwayat hasil pengerjaan ujian.</p>`;
+            return;
+          }
+
+          list.innerHTML = window.resultsData.map(res => `
+            <div class="bg-surface-800 border border-slate-800 rounded-xl p-4 flex justify-between items-center shadow-md">
+              <div>
+                <h4 class="text-sm font-semibold text-white">${res.title}</h4>
+                <p class="text-[11px] text-slate-400 mt-1">📅 Selesai pada: ${res.date} · Akurasi: ${res.correctCount} / ${res.totalQuestions} Benar</p>
+              </div>
+              <div class="text-right">
+                <span class="text-lg font-mono font-bold ${res.score >= 70 ? 'text-emerald-400' : 'text-rose-400'}">${res.score}</span>
+                <p class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Skor Akhir</p>
+              </div>
+            </div>
+          `).join("");
+        }
+
+        // ENTRY INSIALISASI SISTEM GLOBAL
+        document.addEventListener("DOMContentLoaded", () => {
+          fetchArticles();
+          document.getElementById("search-artikel")?.addEventListener("input", renderArticles);
         });
-        loadArtikelKelompok();
-      } catch (e) {
-        alert("Gagal memproses penghapusan.");
-      }
-    }
-
-    // 4. LOGIKA ENGINE JAWABAN UJIAN (EVALUASI)
-    document.getElementById('quiz-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const namaSiswa = document.getElementById('quiz-student-name').value;
-      const jwb1 = document.querySelector('input[name="q1"]:checked').value;
-      const jwb2 = document.querySelector('input[name="q2"]:checked').value;
-      
-      let skorTotal = 0;
-      
-      // Kunci Jawaban Benar: Soal 1 = B, Soal 2 = A
-      if (jwb1 === 'B') skorTotal += 50;
-      if (jwb2 === 'A') skorTotal += 50;
-      
-      // Menampilkan pengumuman hasil ujian di layar
-      document.getElementById('quiz-score-display').innerText = `Skor: ${skorTotal} / 100`;
-      document.getElementById('quiz-student-display').innerText = `Nama Peserta: ${namaSiswa} (Dinilai Otomatis oleh Sistem)`;
-      
-      const resultBox = document.getElementById('quiz-result-box');
-      resultBox.classList.remove('hidden');
-      
-      // Efek fokus otomatis ke kotak nilai
-      resultBox.scrollIntoView({ behavior: 'smooth' });
-    });
-
-    // Otomatis memuat data saat website pertama kali dibuka browser
-    window.onload = loadArtikelKelompok;
-  </script>
-</body>
+      })();
+    </script>
+  </body>
 </html>

@@ -146,11 +146,6 @@
       </nav>
     </div>
 
-    <div id="undo-toast" class="fixed bottom-36 right-6 md:bottom-6 z-[150] bg-surface-800 border border-cyan-500/20 p-4 rounded-xl shadow-2xl flex items-center gap-4 max-w-sm hidden">
-      <div class="flex-1"><p class="text-xs font-bold text-white">Data berhasil dihapus</p></div>
-      <button onclick="picuUndoGlobal()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg shadow">UNDO</button>
-    </div>
-
     <div id="modal-tulis" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
       <div class="bg-surface-800 border border-slate-700 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-surface-900/50">
@@ -214,9 +209,9 @@
             </div>
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-2 uppercase">Bank Soal</label>
-            <div id="questions-container" class="space-y-3"></div>
-            <button onclick="tambahSoal()" class="mt-2 w-full border border-dashed border-slate-700 text-slate-400 text-xs font-semibold py-3 rounded-xl bg-surface-900/40">➕ Tambah Slot Soal</button>
+            <label class="block text-[11px] font-bold text-slate-400 mb-2 uppercase">Bank Soal (Pilihan Ganda)</label>
+            <div id="questions-container" class="space-y-4"></div>
+            <button onclick="tambahSoal()" class="mt-3 w-full border border-dashed border-slate-700 text-slate-400 text-xs font-semibold py-3 rounded-xl bg-surface-900/40 hover:text-white hover:border-indigo-500">➕ Tambah Slot Soal</button>
           </div>
         </div>
         <div class="p-4 border-t border-slate-700 bg-surface-900/50 flex justify-end gap-3">
@@ -238,12 +233,12 @@
       </div>
       <div class="flex-1 overflow-y-auto px-6 py-12">
         <div class="max-w-2xl mx-auto">
-          <div id="question-area" class="bg-surface-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+          <div id="question-area" class="bg-surface-800 border border-slate-700 rounded-2xl p-6 shadow-xl relative">
             <h4 id="question-text" class="text-sm text-white font-medium mb-6 leading-relaxed"></h4>
             <div id="options-container" class="space-y-3"></div>
           </div>
           <div class="text-center mt-8">
-            <button onclick="submitUjian()" class="bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-xs px-10 py-3.5 rounded-xl shadow-xl">✅ Kirim Jawaban</button>
+            <button onclick="submitUjian()" class="bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-xs px-10 py-3.5 rounded-xl shadow-xl hover:opacity-90">✅ Kirim Semua Jawaban</button>
           </div>
         </div>
       </div>
@@ -255,10 +250,9 @@
         const AUTH_HEADER = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.QMUFsIDTnFmyG3nMiGM6SDlOWk5GTlVSR0Yzd2g3U21xSnAtUXYzMA";
         
         window.articlesData = []; window.examsData = []; window.resultsData = [];
-        let undoTargetId = null;
-        let undoTargetType = null; let undoBackupData = null; let toastTimeout = null;
         let activeExam = null; let userAnswers = {};
         let examTimerInterval = null; let examTimeRemaining = 0; let soalSementara = [];
+        
         const gradienWarna = [
           "from-cyan-500 to-blue-600",     
           "from-purple-500 to-indigo-600", 
@@ -271,7 +265,7 @@
           const drawer = document.getElementById("drawer-menu");
           if (open) { 
             drawer.classList.remove("hidden");
-            document.body.classList.add("drawer-open"); 
+            document.body.classList.add("drawer-open");
           } else { 
             drawer.classList.add("hidden"); 
             document.body.classList.remove("drawer-open");
@@ -297,29 +291,6 @@
           if (tab === "riwayat") renderHistory();
         }
         window.switchTab = switchTab;
-
-        function tampilkanUndoToast(type, data, id) {
-          undoTargetType = type; undoBackupData = data;
-          undoTargetId = id;
-          const toast = document.getElementById("undo-toast");
-          toast.classList.remove("hidden");
-          clearTimeout(toastTimeout);
-          toastTimeout = setTimeout(() => { toast.classList.add("hidden"); }, 5000);
-        }
-
-        window.picuUndoGlobal = async function() {
-          if (!undoTargetType || !undoBackupData) return;
-          document.getElementById("undo-toast").classList.add("hidden");
-          try {
-            const segment = undoTargetType === 'article' ? 'articles' : 'exams';
-            await fetch(`${API_ENDPOINT}/${segment}`, {
-              method: "POST",
-              headers: { Authorization: `Bearer ${AUTH_HEADER}`, "Content-Type": "application/json" },
-              body: JSON.stringify(undoBackupData)
-            });
-            if (undoTargetType === 'article') fetchArticles(); else fetchExams();
-          } catch(e) { console.error(e); }
-        };
 
         async function fetchArticles() {
           try {
@@ -401,15 +372,22 @@
         window.bukaModalEditArtikel = bukaModalEditArtikel;
 
         async function hapusArtikelInstan(id) {
-          const idx = window.articlesData.findIndex(a => a.id === id);
-          if (idx === -1) return;
-          const backup = window.articlesData[idx]; 
-          window.articlesData.splice(idx, 1);
-          renderArticles(); 
-          tampilkanUndoToast('article', backup, id);
+          if (!confirm("Apakah kamu yakin ingin menghapus artikel jurnal ini secara permanen?")) return;
           try { 
-            await fetch(`${API_ENDPOINT}/articles/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${AUTH_HEADER}` } }); 
-          } catch (e) { console.error(e); }
+            const res = await fetch(`${API_ENDPOINT}/articles/${id}`, { 
+              method: "DELETE", 
+              headers: { Authorization: `Bearer ${AUTH_HEADER}` } 
+            });
+            if (res.ok) {
+              window.articlesData = window.articlesData.filter(a => a.id !== id);
+              renderArticles();
+            } else {
+              alert("Gagal menghapus materi dari Cloudflare.");
+            }
+          } catch (e) { 
+            console.error(e); 
+            alert("Terjadi gangguan koneksi internet.");
+          }
         }
         window.hapusArtikelInstan = hapusArtikelInstan;
 
@@ -500,14 +478,22 @@
         window.bukaModalEditUjian = bukaModalEditUjian;
 
         async function hapusUjianInstan(id) {
-          const target = window.examsData.find(e => e.id === id);
-          if (!target) return;
-          window.examsData = window.examsData.filter(e => e.id !== id);
-          renderExamsData(); 
-          tampilkanUndoToast('exam', target, id);
+          if (!confirm("Apakah kamu yakin ingin menghapus simulator ujian ini secara permanen?")) return;
           try { 
-            await fetch(`${API_ENDPOINT}/exams/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${AUTH_HEADER}` } }); 
-          } catch (e) { console.error(e); }
+            const res = await fetch(`${API_ENDPOINT}/exams/${id}`, { 
+              method: "DELETE", 
+              headers: { Authorization: `Bearer ${AUTH_HEADER}` } 
+            });
+            if (res.ok) {
+              window.examsData = window.examsData.filter(e => e.id !== id);
+              renderExamsData();
+            } else {
+              alert("Gagal menghapus lembar ujian dari Cloudflare.");
+            }
+          } catch (e) { 
+            console.error(e); 
+            alert("Terjadi gangguan koneksi internet.");
+          }
         }
         window.hapusUjianInstan = hapusUjianInstan;
 
@@ -531,19 +517,38 @@
         window.mulaiUjian = mulaiUjian;
 
         function bukaSoal(idx) {
+          if (!activeExam || !activeExam.questions || activeExam.questions.length === 0) return;
           const q = activeExam.questions[idx]; 
-          document.getElementById("question-text").textContent = q.text;
+          document.getElementById("question-text").innerHTML = `<span class="text-cyan-400 font-bold font-mono">Soal ${idx + 1}/${activeExam.questions.length}:</span> ${q.text}`;
+          
           const container = document.getElementById("options-container");
           container.innerHTML = q.options.map((o, oi) => {
-            return `<label class="flex items-center gap-3 border border-slate-700 bg-surface-900/50 px-4 py-3.5 rounded-xl cursor-pointer hover:border-cyan-500/30">
-              <input type="radio" name="ans" value="${oi}" onclick="userAnswers[${idx}] = ${oi}" class="h-4 w-4 text-cyan-500" />
+            const isChecked = userAnswers[idx] === oi ? 'checked' : '';
+            return `<label class="flex items-center gap-3 border border-slate-700 bg-surface-900/50 px-4 py-3.5 rounded-xl cursor-pointer hover:border-cyan-500/30 transition-colors">
+              <input type="radio" name="ans" value="${oi}" ${isChecked} onclick="userAnswers[${idx}] = ${oi}" class="h-4 w-4 text-cyan-500 focus:ring-0" />
               <span class="text-xs text-slate-300">${o}</span>
             </label>`;
           }).join("");
+
+          const navigasiId = "exam-nav-buttons";
+          let navDiv = document.getElementById(navigasiId);
+          if (!navDiv) {
+            navDiv = document.createElement("div");
+            navDiv.id = navigasiId;
+            navDiv.className = "flex justify-between items-center mt-6 pt-4 border-t border-slate-700/60";
+            document.getElementById("question-area").appendChild(navDiv);
+          }
+
+          navDiv.innerHTML = `
+            <button onclick="bukaSoal(${idx - 1})" ${idx === 0 ? 'disabled class="opacity-30 text-xs text-slate-500 cursor-not-allowed"' : 'class="text-xs text-cyan-400 hover:text-white font-semibold"'}>◀ Sebelumnya</button>
+            <span class="text-[11px] font-mono text-slate-500">Navigasi Tes</span>
+            <button onclick="${idx === activeExam.questions.length - 1 ? 'submitUjian()' : `bukaSoal(${idx + 1})`}" class="text-xs text-indigo-400 hover:text-white font-semibold">${idx === activeExam.questions.length - 1 ? 'Selesai & Kirim ✔' : 'Berikutnya ▶'}</button>
+          `;
         }
+        window.bukaSoal = bukaSoal;
 
         function forceKeluarUjian() { 
-          clearInterval(examTimerInterval); 
+          clearInterval(examTimerInterval);
           activeExam = null; 
           document.getElementById("modal-kerjakan-ujian").classList.add("hidden");
         }
@@ -579,18 +584,41 @@
         function renderSoalSementaraDOM() {
           const container = document.getElementById("questions-container");
           container.innerHTML = soalSementara.map((s, idx) => {
-            return `<div class="bg-surface-900 p-4 rounded-xl border border-slate-700 space-y-2">
-              <input type="text" value="${s.text}" oninput="soalSementara[${idx}].text = this.value" class="w-full bg-surface-800 border border-slate-700 text-xs text-white rounded-lg p-2.5" placeholder="Pertanyaan..." />
+            if (!s.options || s.options.length < 4) {
+              s.options = [
+                s.options[0] || "",
+                s.options[1] || "",
+                s.options[2] || "",
+                s.options[3] || ""
+              ];
+            }
+            return `<div class="bg-surface-900 p-4 rounded-xl border border-slate-700 space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Soal #${idx + 1}</span>
+                <button onclick="event.preventDefault(); soalSementara.splice(${idx}, 1); renderSoalSementaraDOM();" class="text-rose-400 hover:text-rose-300 text-[10px] font-bold">❌ Hapus Slot</button>
+              </div>
+              <input type="text" value="${s.text || ''}" oninput="soalSementara[${idx}].text = this.value" class="w-full bg-surface-800 border border-slate-700 text-xs text-white rounded-lg p-2.5" placeholder="Pertanyaan..." />
               <div class="grid grid-cols-2 gap-2">
                 <input type="text" value="${s.options[0]}" oninput="soalSementara[${idx}].options[0] = this.value" class="w-full bg-surface-800 border border-slate-700 text-xs text-slate-400 rounded-lg p-2" placeholder="Opsi A" />
                 <input type="text" value="${s.options[1]}" oninput="soalSementara[${idx}].options[1] = this.value" class="w-full bg-surface-800 border border-slate-700 text-xs text-slate-400 rounded-lg p-2" placeholder="Opsi B" />
+                <input type="text" value="${s.options[2]}" oninput="soalSementara[${idx}].options[2] = this.value" class="w-full bg-surface-800 border border-slate-700 text-xs text-slate-400 rounded-lg p-2" placeholder="Opsi C" />
+                <input type="text" value="${s.options[3]}" oninput="soalSementara[${idx}].options[3] = this.value" class="w-full bg-surface-800 border border-slate-700 text-xs text-slate-400 rounded-lg p-2" placeholder="Opsi D" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Kunci Jawaban Benar</label>
+                <select onchange="soalSementara[${idx}].answerIndex = parseInt(this.value)" class="w-full bg-surface-800 border border-slate-700 text-xs text-white rounded-lg p-2 focus:outline-none focus:border-indigo-500">
+                  <option value="0" ${s.answerIndex === 0 ? 'selected' : ''}>Opsi A</option>
+                  <option value="1" ${s.answerIndex === 1 ? 'selected' : ''}>Opsi B</option>
+                  <option value="2" ${s.answerIndex === 2 ? 'selected' : ''}>Opsi C</option>
+                  <option value="3" ${s.answerIndex === 3 ? 'selected' : ''}>Opsi D</option>
+                </select>
               </div>
             </div>`;
           }).join("");
         }
 
         function tambahSoal() { 
-          soalSementara.push({ text: "Pertanyaan?", options: ["Benar", "Salah"], answerIndex: 0 });
+          soalSementara.push({ text: "", options: ["", "", "", ""], answerIndex: 0 });
           renderSoalSementaraDOM(); 
         }
         window.tambahSoal = tambahSoal;

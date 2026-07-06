@@ -2,537 +2,88 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <title>EduPulse Pro · Portal Jurnal & Simulator Ujian</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduPulse · Portal Jurnal & Ujian</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ["Plus Jakarta Sans", "Inter", "sans-serif"],
-            },
-            colors: {
-              surface: {
-                900: "#0b0f19",
-                800: "#151b2c",
-                700: "#222b44",
-              },
-            },
-          },
-        },
-      };
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700&family=Playfair+Display:ital,wght=0,600;1,400&display=swap" rel="stylesheet" />
     <style>
-      .serif-title { font-family: "Playfair Display", Georgia, serif; }
-      * { transition: all 0.2s ease-in-out; }
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: #0b0f19; }
-      ::-webkit-scrollbar-thumb { background: #222b44; border-radius: 10px; }
-      ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
-      
-      .exam-option-input:checked + .exam-option-label {
-        border-color: #22d3ee !important;
-        background: rgba(34, 211, 238, 0.1) !important;
-        box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.3);
-      }
+      .bg-surface-900 { background-color: #0b0f19; }
+      .bg-surface-800 { background-color: #151b2c; }
     </style>
   </head>
-  <body class="bg-surface-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-cyan-500/30 pb-36 md:pb-0">
-
-    <nav class="border-b border-slate-800/60 bg-surface-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
-      <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-8">
-          <a href="#" class="flex items-center gap-3 group">
-            <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-extrabold shadow-lg shadow-cyan-500/20">E</div>
-            <span class="text-lg font-bold tracking-tight text-white">Edu<span class="text-cyan-400">Pulse Pro.</span></span>
-          </a>
-          <div class="hidden md:flex items-center gap-6 text-xs font-semibold uppercase tracking-wider text-slate-400">
-            <button onclick="switchTab('artikel')" id="nav-artikel" class="hover:text-white text-cyan-400 border-b-2 border-cyan-500 pb-1">📄 Jurnal Materi</button>
-            <button onclick="switchTab('ujian')" id="nav-ujian" class="hover:text-white">📝 Simulator Ujian</button>
-            <button onclick="switchTab('riwayat')" id="nav-riwayat" class="hover:text-white">📊 Rekam Evaluasi</button>
-          </div>
-        </div>
-        <div class="hidden md:flex items-center gap-3">
-          <button onclick="bukaModalTambah()" class="bg-surface-800 hover:bg-surface-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700">✍️ Terbitkan Jurnal</button>
-          <button onclick="bukaModalBuatUjian()" class="bg-gradient-to-r from-cyan-500 to-indigo-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md">📝 Konfigurasi Soal</button>
+  <body class="bg-surface-900 text-white min-h-screen p-6">
+    
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold mb-6">Dashboard EduPulse</h1>
+      
+      <div class="mb-10">
+        <h2 class="text-lg font-semibold mb-4">Daftar Artikel</h2>
+        <div id="articles-container" class="space-y-4">
+          <p class="text-slate-500">Memuat data...</p>
         </div>
       </div>
-    </nav>
 
-    <main class="max-w-7xl mx-auto w-full px-6 py-10 flex-grow">
-      <section class="text-center py-6 max-w-4xl mx-auto space-y-4">
-        <div class="inline-block bg-cyan-950/40 border border-cyan-800/50 text-cyan-400 text-xs font-bold tracking-widest uppercase px-5 py-2 rounded-full shadow-inner">
-          Cloudflare D1 Database Active
-        </div>
-        <h1 class="serif-title text-4xl md:text-5xl text-white font-semibold leading-tight tracking-tight">
-          Sistem Informasi Publikasi Jurnal & Evaluasi Akademik
-        </h1>
-      </section>
-
-      <section id="section-artikel" class="space-y-8 pt-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/60 pb-5">
-          <div class="flex items-center gap-3">
-            <h2 class="text-xs font-extrabold tracking-widest uppercase text-slate-400">Daftar Jurnal Ilmiah</h2>
-            <span id="article-count" class="bg-surface-800 text-cyan-400 text-xs px-2.5 py-0.5 rounded-md font-mono border border-slate-700">0</span>
-          </div>
-          <input type="text" id="search-artikel" placeholder="🔍 Cari judul materi..." oninput="renderArticles()" class="bg-surface-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 w-full sm:w-64" />
-        </div>
-        <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-      </section>
-
-      <section id="section-ujian" class="hidden space-y-8 pt-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/60 pb-5">
-          <div class="flex items-center gap-3">
-            <h2 class="text-xs font-extrabold tracking-widest uppercase text-slate-400">Daftar Paket Simulator</h2>
-            <span id="exam-count" class="bg-surface-800 text-indigo-400 text-xs px-2.5 py-0.5 rounded-md font-mono border border-slate-700">0</span>
-          </div>
-          <input type="text" id="search-ujian" placeholder="🔍 Cari paket evaluasi..." oninput="renderExams()" class="bg-surface-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-full sm:w-64" />
-        </div>
-        <div id="exams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-      </section>
-
-      <section id="section-riwayat" class="hidden space-y-6 pt-6">
-        <div class="border-b border-slate-800/60 pb-5">
-          <h2 class="text-xs font-extrabold tracking-widest uppercase text-slate-400">Log Hasil Pengerjaan Ujian</h2>
-        </div>
-        <div id="stats-container" class="grid grid-cols-1 gap-4 max-w-xl"></div>
-        <div id="history-list" class="space-y-3 mt-6"></div>
-      </section>
-    </main>
-
-    <div id="modal-baca" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-surface-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-surface-900/50">
-          <h3 id="baca-title" class="text-xs font-bold uppercase tracking-wider text-cyan-400">📄 Judul Artikel</h3>
-          <button onclick="tutupModalBaca()" class="text-slate-400 hover:text-white text-xl">&times;</button>
-        </div>
-        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-          <p id="baca-content" class="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap"></p>
-        </div>
-        <div class="px-6 py-4 bg-surface-900/40 border-t border-slate-700 flex justify-end">
-          <button onclick="tutupModalBaca()" class="bg-surface-700 text-white text-xs font-bold px-4 py-2 rounded-xl">Tutup</button>
+      <div>
+        <h2 class="text-lg font-semibold mb-4">Daftar Ujian</h2>
+        <div id="exams-container" class="space-y-4">
+          <p class="text-slate-500">Memuat data...</p>
         </div>
       </div>
-    </div>
-
-    <div id="modal-tulis" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-surface-800 border border-slate-700 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-surface-900/50">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">✍️ Terbitkan Materi Jurnal Baru</h3>
-          <button onclick="tutupModalTambah()" class="text-slate-400 hover:text-white text-xl">&times;</button>
-        </div>
-        <div class="p-6 space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Topik / Judul Jurnal</label>
-            <input type="text" id="input-title" class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500" placeholder="Masukkan judul..." />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Isi Kandungan Publikasi</label>
-            <textarea id="input-content" rows="6" class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none focus:border-cyan-500" placeholder="Tulis isi materi..."></textarea>
-          </div>
-          <div class="flex justify-end gap-3">
-            <button onclick="tutupModalTambah()" class="px-4 py-2 text-xs text-slate-400 hover:text-white">Batal</button>
-            <button onclick="simpanArtikelBaru()" class="bg-cyan-600 hover:bg-cyan-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-md">Kirim ke Basis Data</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="modal-buat-ujian" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
-      <div class="bg-surface-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl my-8">
-        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-surface-900/50">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">📝 Konfigurasi Evaluasi Komprehensif</h3>
-          <button onclick="tutupModalUjian()" class="text-slate-400 hover:text-white text-xl">&times;</button>
-        </div>
-        <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-          <div class="grid grid-cols-3 gap-4">
-            <div class="col-span-2">
-              <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Nama Paket Ujian</label>
-              <input type="text" id="exam-title-input" class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Contoh: UTS Aljabar Linier" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Durasi (Menit)</label>
-              <input type="number" id="exam-duration-input" value="30" min="1" class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 text-center font-mono" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Deskripsi Ringkas</label>
-            <textarea id="exam-desc-input" rows="2" class="w-full bg-surface-900 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white resize-none focus:outline-none focus:border-indigo-500" placeholder="Keterangan ujian..."></textarea>
-          </div>
-          <div class="border-t border-slate-700/60 pt-4">
-            <div class="flex justify-between items-center mb-3">
-              <label class="text-xs font-bold text-slate-400 uppercase tracking-wide">Butir Soal Pilihan Ganda</label>
-              <button onclick="tambahSoal()" class="text-xs text-cyan-400 font-bold hover:underline">+ Slot Pertanyaan</button>
-            </div>
-            <div id="soal-container" class="space-y-4"></div>
-          </div>
-          <div class="flex justify-end gap-3 pt-4 border-t border-slate-700">
-            <button onclick="tutupModalUjian()" class="px-4 py-2 text-xs text-slate-400 hover:text-white">Batal</button>
-            <button onclick="simpanUjianOnline()" class="bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-md">Simpan ke Cloudflare</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="modal-kerjakan-ujian" class="fixed inset-0 bg-surface-900 z-50 flex flex-col hidden">
-      <header class="border-b border-slate-800 bg-surface-800/50 px-6 py-4 flex justify-between items-center">
-        <div>
-          <h2 id="run-exam-title" class="text-md font-bold text-white">Judul Ujian Aktif</h2>
-          <p id="run-exam-desc" class="text-xs text-slate-400"></p>
-        </div>
-        <div class="bg-rose-950/40 border border-rose-800/60 px-4 py-2 rounded-xl text-center">
-          <span class="block text-[10px] text-rose-400 uppercase font-bold tracking-wider">Sisa Waktu</span>
-          <span id="run-exam-timer" class="text-sm font-mono text-white font-bold">00:00</span>
-        </div>
-      </header>
-      <div class="flex-grow overflow-y-auto p-6 max-w-3xl mx-auto w-full space-y-6" id="run-exam-body"></div>
-      <footer class="border-t border-slate-800 bg-surface-800/30 p-6 flex justify-between items-center max-w-3xl mx-auto w-full">
-        <span class="text-xs text-slate-400" id="run-exam-progress">Soal 0 dari 0 Terjawab</span>
-        <button onclick="selesaikanPengerjaanUjian()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg">Kumpulkan Jawaban</button>
-      </footer>
     </div>
 
     <script>
-      // Endpoint otomatis mendeteksi jika di-deploy dalam cluster Cloudflare Assets tunggal (.)
-      const BASE_API_URL = window.location.origin.includes("github.io") 
-        ? "https://lms-crud-worker.username.workers.dev" 
-        : ""; 
-
-      // Generator token valid pembawa signature header & payload klaim user
-      const tokenHeader = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" })).replace(/=/g, "");
-      const tokenPayload = btoa(JSON.stringify({ username: "Agung Barlian", exp: Math.floor(Date.now() / 1000) + 86400 })).replace(/=/g, "");
-      const JWT_TOKEN = `${tokenHeader}.${tokenPayload}.signature_placeholder`;
-
-      let articlesData = [];
-      let examsData = [];
-      let resultsData = [];
-      let soalSementara = [];
-      
-      let ujianAktifData = null;
-      let jawabanUser = {};
-      let intervalTimerUjian = null;
-
-      function switchTab(tab) {
-        ["artikel", "ujian", "riwayat"].forEach(t => {
-          document.getElementById(`section-${t}`).classList.add("hidden");
-          document.getElementById(`nav-${t}`).className = "hover:text-white text-slate-400";
-        });
-        document.getElementById(`section-${tab}`).classList.remove("hidden");
-        document.getElementById(`nav-${tab}`).className = "hover:text-white text-cyan-400 border-b-2 border-cyan-500 pb-1";
-        if(tab === 'riwayat') renderHistory();
-      }
-
-      // ==========================================
-      // CONTROLLER DATA ARTIKEL (GET & POST)
-      // ==========================================
+      // 1. Fungsi Fetch Articles
       async function fetchArticles() {
+        const container = document.getElementById("articles-container");
         try {
-          const res = await fetch(`${BASE_API_URL}/api/articles`, {
-            headers: { "Authorization": `Bearer ${JWT_TOKEN}` }
-          });
+          const res = await fetch("/api/articles");
           const result = await res.json();
-          if (result && result.success && Array.isArray(result.data)) {
-            articlesData = result.data;
-          } else if (Array.isArray(result)) {
-            articlesData = result;
+          
+          // Memastikan data diambil dari result.data jika berbentuk objek
+          const data = Array.isArray(result) ? result : (result.data || []);
+          
+          if (data.length === 0) {
+            container.innerHTML = "<p>Belum ada artikel.</p>";
+            return;
           }
-          renderArticles();
-        } catch (e) { console.error("Koneksi gagal ke API Cloudflare Articles:", e); }
-      }
 
-      function renderArticles() {
-        const grid = document.getElementById("articles-grid");
-        document.getElementById("article-count").textContent = articlesData.length;
-        const query = document.getElementById("search-artikel").value.toLowerCase();
-        
-        const filtered = articlesData.filter(a => a.title.toLowerCase().includes(query));
-        if(filtered.length === 0) {
-          grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 border border-dashed border-slate-800 rounded-2xl text-xs">Tidak ditemukan arsip jurnal ilmiah.</div>`;
-          return;
+          container.innerHTML = data.map(item => `
+            <div class="bg-surface-800 p-4 rounded-lg border border-slate-700">
+              <h3 class="font-bold">${item.title}</h3>
+              <p class="text-sm text-slate-400">${item.content.substring(0, 100)}...</p>
+            </div>
+          `).join("");
+        } catch (e) {
+          container.innerHTML = "<p class='text-red-500'>Gagal memuat artikel.</p>";
         }
-
-        grid.innerHTML = filtered.map(a => `
-          <div class="bg-surface-800 p-6 rounded-2xl border border-slate-800/60 flex flex-col justify-between group hover:border-slate-700">
-            <div>
-              <div class="text-[10px] text-cyan-400 font-mono mb-2 uppercase">Author: ${a.author || 'Anonymous'}</div>
-              <h3 class="text-sm font-bold text-white mb-2 group-hover:text-cyan-400">${a.title}</h3>
-              <p class="text-xs text-slate-400 line-clamp-4 leading-relaxed">${a.content}</p>
-            </div>
-            <div class="mt-5 pt-3 border-t border-slate-700/40 flex justify-between items-center">
-              <span class="text-[10px] text-slate-500 font-mono">${new Date(a.created_at || Date.now()).toLocaleDateString('id-ID')}</span>
-              <button onclick="bukaDanBacaArtikel('${a.title}', \`${a.content.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" class="text-xs text-cyan-400/90 hover:text-cyan-400 font-medium">Baca Selengkapnya &rarr;</button>
-            </div>
-          </div>
-        `).join("");
       }
 
-      async function simpanArtikelBaru() {
-        const title = document.getElementById("input-title").value.trim();
-        const content = document.getElementById("input-content").value.trim();
-        if(!title || !content) return alert("Semua form materi wajib diisi lengkap!");
-
-        const payload = { title, content };
-        try {
-          const res = await fetch(`${BASE_API_URL}/api/articles`, {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${JWT_TOKEN}`
-            },
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-          if(data.success) {
-            tutupModalTambah();
-            fetchArticles();
-          } else { alert(data.error || "Gagal menyimpan artikel."); }
-        } catch(e) { alert("Error sistem saat memproses penyimpanan D1."); }
-      }
-
-      // ==========================================
-      // CONTROLLER DATA EXAMS (GET & POST)
-      // ==========================================
+      // 2. Fungsi Fetch Exams
       async function fetchExams() {
+        const container = document.getElementById("exams-container");
         try {
-          const res = await fetch(`${BASE_API_URL}/api/exams`, {
-            headers: { "Authorization": `Bearer ${JWT_TOKEN}` }
-          });
+          const res = await fetch("/api/exams");
           const result = await res.json();
-          if (result && result.success && Array.isArray(result.data)) {
-            examsData = result.data;
-          } else if (Array.isArray(result)) {
-            examsData = result;
+          
+          const data = Array.isArray(result) ? result : (result.data || []);
+          
+          if (data.length === 0) {
+            container.innerHTML = "<p>Belum ada ujian.</p>";
+            return;
           }
-          renderExams();
-        } catch (e) { console.error("Koneksi gagal ke API Cloudflare Exams:", e); }
-      }
 
-      function renderExams() {
-        const grid = document.getElementById("exams-grid");
-        document.getElementById("exam-count").textContent = examsData.length;
-        const query = document.getElementById("search-ujian").value.toLowerCase();
-        
-        const filtered = examsData.filter(e => e.title.toLowerCase().includes(query));
-        if(filtered.length === 0) {
-          grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 border border-dashed border-slate-800 rounded-2xl text-xs">Belum ada paket ujian terdaftar.</div>`;
-          return;
+          container.innerHTML = data.map(item => `
+            <div class="bg-surface-800 p-4 rounded-lg border border-slate-700">
+              <h3 class="font-bold">${item.title}</h3>
+              <p class="text-sm text-slate-400">Durasi: ${item.duration} menit</p>
+            </div>
+          `).join("");
+        } catch (e) {
+          container.innerHTML = "<p class='text-red-500'>Gagal memuat ujian.</p>";
         }
-
-        grid.innerHTML = filtered.map(e => `
-          <div class="bg-surface-800 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
-            <div>
-              <h3 class="text-sm font-bold text-white mb-2">${e.title}</h3>
-              <p class="text-xs text-slate-400 line-clamp-2 mb-4">${e.description || 'Tidak ada deskripsi tambahan.'}</p>
-            </div>
-            <div class="flex justify-between items-center text-xs text-slate-500 pt-3 border-t border-slate-700/40">
-              <span class="font-mono">⏱️ ${e.duration} Menit</span>
-              <button onclick="bukaDanMulaiUjian('${e.id}')" class="bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white px-4 py-2 rounded-xl border border-indigo-500/30 text-xs font-bold">Ikuti Tes</button>
-            </div>
-          </div>
-        `).join("");
       }
 
-      function tambahSoal() {
-        soalTemporaryFromDOM();
-        soalSementara.push({ text: "", options: ["", "", "", ""], answerIndex: 0 });
-        renderSoalSementara();
-      }
-
-      function soalTemporaryFromDOM() {
-        const items = document.querySelectorAll(".soal-item");
-        soalSementara = Array.from(items).map(item => {
-          const text = item.querySelector(".soal-text").value;
-          const options = Array.from(item.querySelectorAll(".opsi-input")).map(i => i.value);
-          const answerIndex = parseInt(item.querySelector(".kunci-select").value);
-          return { text, options, answerIndex };
-        });
-      }
-
-      function renderSoalSementara() {
-        const container = document.getElementById("soal-container");
-        container.innerHTML = soalSementara.map((s, idx) => `
-          <div class="soal-item bg-surface-900 p-4 rounded-xl space-y-2 border border-slate-700/80">
-            <div class="text-[10px] font-bold text-slate-500 uppercase">Soal #${idx + 1}</div>
-            <input type="text" value="${s.text}" class="soal-text w-full bg-surface-800 text-xs text-white p-2.5 rounded-lg border border-slate-700 focus:outline-none focus:border-indigo-500" placeholder="Ketik kalimat pertanyaan..." />
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" value="${s.options[0]}" class="opsi-input bg-surface-800 text-xs text-white p-2 rounded-lg border border-slate-700" placeholder="Pilihan A" />
-              <input type="text" value="${s.options[1]}" class="opsi-input bg-surface-800 text-xs text-white p-2 rounded-lg border border-slate-700" placeholder="Pilihan B" />
-              <input type="text" value="${s.options[2]}" class="opsi-input bg-surface-800 text-xs text-white p-2 rounded-lg border border-slate-700" placeholder="Pilihan C" />
-              <input type="text" value="${s.options[3]}" class="opsi-input bg-surface-800 text-xs text-white p-2 rounded-lg border border-slate-700" placeholder="Pilihan D" />
-            </div>
-            <select class="kunci-select w-full bg-surface-800 text-xs text-slate-300 p-2 rounded-lg border border-slate-700">
-              <option value="0" ${s.answerIndex===0?'selected':''}>Jawaban Benar: Opsi A</option>
-              <option value="1" ${s.answerIndex===1?'selected':''}>Jawaban Benar: Opsi B</option>
-              <option value="2" ${s.answerIndex===2?'selected':''}>Jawaban Benar: Opsi C</option>
-              <option value="3" ${s.answerIndex===3?'selected':''}>Jawaban Benar: Opsi D</option>
-            </select>
-          </div>
-        `).join("");
-      }
-
-      async function simpanUjianOnline() {
-        const title = document.getElementById("exam-title-input").value.trim();
-        const duration = parseInt(document.getElementById("exam-duration-input").value);
-        const description = document.getElementById("exam-desc-input").value.trim();
-        soalTemporaryFromDOM();
-
-        if(!title || !duration || soalSementara.length === 0) {
-          return alert("Judul, durasi paket, dan minimal 1 butir pertanyaan wajib dilengkapi!");
-        }
-
-        const payload = {
-          title: title,
-          description: description,
-          duration: duration,
-          questions: soalSementara
-        };
-
-        try {
-          const res = await fetch(`${BASE_API_URL}/api/exams`, {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json", 
-              "Authorization": `Bearer ${JWT_TOKEN}` 
-            },
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-          if(data.success) {
-            tutupModalUjian();
-            fetchExams();
-          } else { alert(data.error || "Gagal mengunggah konfigurasi soal."); }
-        } catch(e) { alert("Gagal melakukan transmisi data ke infrastruktur Cloudflare."); }
-      }
-
-      // ==========================================
-      // SIMULATOR PENGERJAAN INTERAKTIF ENGINE
-      // ==========================================
-      function bukaDanMulaiUjian(id) {
-        const exam = examsData.find(e => e.id === id);
-        if(!exam || !exam.questions || exam.questions.length === 0) return alert("Paket ujian kosong atau rusak.");
-
-        ujianAktifData = exam;
-        jawabanUser = {};
-        
-        document.getElementById("run-exam-title").textContent = exam.title;
-        document.getElementById("run-exam-desc").textContent = exam.description || "Ujian Evaluasi";
-        
-        // Render Butir Soal Ke Atas Layar Simulator
-        const body = document.getElementById("run-exam-body");
-        body.innerHTML = exam.questions.map((q, sIdx) => `
-          <div class="bg-surface-800 p-6 rounded-2xl border border-slate-800 space-y-4">
-            <h4 class="text-sm font-semibold text-white leading-relaxed"><span class="text-cyan-400 font-mono mr-1">Q${sIdx+1}.</span> ${q.text}</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              ${q.options.map((opt, oIdx) => `
-                <label class="relative flex items-center p-3 rounded-xl border border-slate-700 bg-surface-900 cursor-pointer group hover:border-slate-600">
-                  <input type="radio" name="soal-${sIdx}" value="${oIdx}" onclick="catatJawabanUser(${sIdx}, ${oIdx})" class="exam-option-input sr-only" />
-                  <span class="exam-option-label absolute inset-0 rounded-xl border border-transparent pointer-events-none"></span>
-                  <span class="text-xs font-bold text-slate-500 font-mono w-6 h-6 rounded-lg bg-surface-800 flex items-center justify-center mr-3 group-hover:text-white">${String.fromCharCode(65 + oIdx)}</span>
-                  <span class="text-xs text-slate-300 group-hover:text-white">${opt}</span>
-                </label>
-              `).join("")}
-            </div>
-          </div>
-        `).join("");
-
-        updateStatusProgressUjian();
-        
-        // Setup Hitung Mundur Waktu
-        let totalDetik = exam.duration * 60;
-        document.getElementById("modal-kerjakan-ujian").classList.remove("hidden");
-        
-        intervalTimerUjian = setInterval(() => {
-          let m = Math.floor(totalDetik / 60);
-          let s = totalDetik % 60;
-          document.getElementById("run-exam-timer").textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-          if(totalDetik <= 0) {
-            clearInterval(intervalTimerUjian);
-            alert("Waktu habis! Jawaban Anda otomatis dikumpulkan.");
-            selesaikanPengerjaanUjian();
-          }
-          totalDetik--;
-        }, 1000);
-      }
-
-      function catatJawabanUser(soalIdx, opsiIdx) {
-        jawabanUser[soalIdx] = opsiIdx;
-        updateStatusProgressUjian();
-      }
-
-      function updateStatusProgressUjian() {
-        const total = ujianAktifData.questions.length;
-        const terjawab = Object.keys(jawabanUser).length;
-        document.getElementById("run-exam-progress").textContent = `Soal ${terjawab} dari ${total} Terjawab`;
-      }
-
-      function selesaikanPengerjaanUjian() {
-        clearInterval(intervalTimerUjian);
-        const questions = ujianAktifData.questions;
-        let benar = 0;
-
-        questions.forEach((q, idx) => {
-          if(jawabanUser[idx] !== undefined && parseInt(jawabanUser[idx]) === parseInt(q.answerIndex)) {
-            benar++;
-          }
-        });
-
-        let skorAkhir = Math.round((benar / questions.length) * 100);
-        
-        resultsData.unshift({
-          id: Date.now(),
-          title: ujianAktifData.title,
-          score: skorSkor(skorAkhir),
-          date: new Date().toLocaleString('id-ID')
-        });
-
-        document.getElementById("modal-kerjakan-ujian").classList.add("hidden");
-        alert(`Ujian selesai! Skor Anda: ${skorSkor(skorAkhir)} Pts`);
-        switchTab('riwayat');
-      }
-
-      function skorSkor(val) { return isNaN(val) ? 0 : val; }
-
-      function renderHistory() {
-        const container = document.getElementById("stats-container");
-        const list = document.getElementById("history-list");
-        if(resultsData.length === 0) {
-          container.innerHTML = `<div class="bg-surface-800 border border-slate-800 p-4 rounded-xl text-center text-xs text-slate-500">Belum ada rekam pengerjaan tes lokal.</div>`;
-          list.innerHTML = "";
-          return;
-        }
-        container.innerHTML = `
-          <div class="bg-surface-800 border border-slate-800 p-4 rounded-xl flex justify-between items-center">
-            <span class="text-xs text-slate-400">Total Tes Diikuti</span>
-            <span class="text-sm font-bold font-mono text-cyan-400">${resultsData.length}</span>
-          </div>
-        `;
-        list.innerHTML = resultsData.map(r => `
-          <div class="bg-surface-800 border border-slate-700/70 p-4 rounded-xl flex justify-between items-center">
-            <div>
-              <h4 class="text-xs font-bold text-white uppercase">${r.title}</h4>
-              <p class="text-[10px] text-slate-500 font-mono mt-1">${r.date}</p>
-            </div>
-            <span class="text-xs font-bold px-3 py-1 rounded bg-surface-900 font-mono ${r.score >= 75 ? 'text-emerald-400' : 'text-amber-400'}">${r.score} Pts</span>
-          </div>
-        `).join("");
-      }
-
-      // Control Window Modal Pop-up Toggle
-      function bukaDanBacaArtikel(title, content) {
-        document.getElementById("baca-title").textContent = title;
-        document.getElementById("baca-content").textContent = content;
-        document.getElementById("modal-baca").classList.remove("hidden");
-      }
-      function tutupModalBaca() { document.getElementById("modal-baca").classList.add("hidden"); }
-      function bukaModalTambah() { document.getElementById("modal-tulis").classList.remove("hidden"); }
-      function tutupModalTambah() { document.getElementById("modal-tulis").classList.add("hidden"); }
-      function bukaModalBuatUjian() { soalSementara = []; tambahSoal(); document.getElementById("modal-buat-ujian").classList.remove("hidden"); }
-      function tutupModalUjian() { document.getElementById("modal-buat-ujian").classList.add("hidden"); }
-
-      // Lifecycle Bootstrapping
-      window.onload = function() {
+      // 3. Inisialisasi
+      window.onload = () => {
         fetchArticles();
         fetchExams();
       };

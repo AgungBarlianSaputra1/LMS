@@ -7,3 +7,4 @@ KELOMPOK UJIAN AKHIR SEMESTER (UAS)
 5. Shaula oceano satria muliawan
 6. Ahmad Sopandi
 7. Dimas Aji Saputra
+8. Bryan Louis

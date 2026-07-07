@@ -153,7 +153,7 @@
       </nav>
     </div>
 
-    <!-- TOAST CONFIRM DIHAPUS -->
+    <!-- TOAST CONFIRM -->
     <div id="custom-confirm-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4 hidden">
       <div class="bg-surface-800 border border-slate-700 w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4">
         <h3 id="confirm-modal-title" class="text-sm font-bold text-white uppercase tracking-wider"></h3>
@@ -243,7 +243,7 @@
       </div>
     </div>
 
-    <!-- MODAL ANTARMUKA KERJAKAN UJIAN SIMULATOR -->
+    <!-- MODAL KERJAKAN UJIAN SIMULATOR -->
     <div id="modal-kerjakan-ujian" class="fixed inset-0 bg-surface-900 z-[60] flex flex-col hidden">
       <div class="border-b border-slate-700 bg-surface-800 px-6 py-4 flex items-center justify-between shadow-md">
         <div class="flex items-center gap-4">
@@ -415,22 +415,19 @@
         }
         window.bukaModalEditArtikel = bukaModalEditArtikel;
 
-        // FIX FIX: Menggunakan perbandingan String(id) agar filter array internal 100% akurat membuang objek & langsung rendering ulang
         function hapusArtikelInstan(id) {
           tampilkanKonfirmasiCustom(
             "Hapus Artikel?", 
             "Apakah kamu yakin ingin menghapus artikel jurnal ini secara permanen dari server?", 
             "Ya, Hapus Jurnal", 
             async () => {
+              window.articlesData = window.articlesData.filter(a => String(a.id) !== String(id));
+              renderArticles(); 
               try { 
-                const res = await fetch(`${API_ENDPOINT}/articles/${id}`, { 
+                await fetch(`${API_ENDPOINT}/articles/${id}`, { 
                   method: "DELETE", 
                   headers: { Authorization: `Bearer ${AUTH_HEADER}` } 
                 });
-                if (res.ok) {
-                  window.articlesData = window.articlesData.filter(a => String(a.id) !== String(id));
-                  renderArticles(); 
-                }
               } catch (e) { console.error(e); }
             }
           );
@@ -524,22 +521,19 @@
         }
         window.bukaModalEditUjian = bukaModalEditUjian;
 
-        // FIX FIX: Menggunakan perbandingan String(id) agar filter array internal 100% akurat membuang objek & langsung rendering ulang
         function hapusUjianInstan(id) {
           tampilkanKonfirmasiCustom(
             "Hapus Soal Ujian?", 
             "Apakah kamu yakin ingin menghapus lembar ujian ini secara permanen dari database D1?", 
             "Ya, Hapus Ujian", 
             async () => {
+              window.examsData = window.examsData.filter(e => String(e.id) !== String(id));
+              renderExamsData(); 
               try { 
-                const res = await fetch(`${API_ENDPOINT}/exams/${id}`, { 
+                await fetch(`${API_ENDPOINT}/exams/${id}`, { 
                   method: "DELETE", 
                   headers: { Authorization: `Bearer ${AUTH_HEADER}` } 
                 });
-                if (res.ok) {
-                  window.examsData = window.examsData.filter(e => String(e.id) !== String(id));
-                  renderExamsData(); 
-                }
               } catch (e) { console.error(e); }
             }
           );
@@ -574,9 +568,9 @@
           
           const container = document.getElementById("options-container");
           container.innerHTML = q.options.map((o, oi) => {
-            const isChecked = userAnswers[idx] === oi ? 'checked' : '';
+            const isChecked = userAnswers[idx] !== undefined && parseInt(userAnswers[idx]) === oi ? 'checked' : '';
             return `<label class="flex items-center gap-3 border border-slate-700 bg-surface-900/50 px-4 py-3.5 rounded-xl cursor-pointer hover:border-cyan-500/30 transition-colors">
-              <input type="radio" name="ans" value="${oi}" ${isChecked} onclick="userAnswers[${idx}] = ${oi}" class="h-4 w-4 text-cyan-500 focus:ring-0" />
+              <input type="radio" name="ans" value="${oi}" ${isChecked} onchange="window.pilihJawabanUjian(${idx}, ${oi})" class="h-4 w-4 text-cyan-500 focus:ring-0" />
               <span class="text-xs text-slate-300">${o}</span>
             </label>`;
           }).join("");
@@ -598,6 +592,35 @@
         }
         window.bukaSoal = bukaSoal;
 
+        function pilihJawabanUjian(soalIdx, opsiIdx) {
+          userAnswers[soalIdx] = parseInt(opsiIdx);
+        }
+        window.pilihJawabanUjian = pilihJawabanUjian;
+
+        function submitUjian() {
+          clearInterval(examTimerInterval); 
+          let benar = 0;
+          
+          if (!activeExam || !activeExam.questions) return;
+
+          activeExam.questions.forEach((q, i) => { 
+            const jawabanUser = userAnswers[i];
+            const jawabanBenar = q.answerIndex;
+
+            if (jawabanUser !== undefined && parseInt(jawabanUser) === parseInt(jawabanBenar)) {
+              benar++; 
+            }
+          });
+          
+          const score = Math.round((benar / activeExam.questions.length) * 100);
+          window.resultsData.unshift({ id: Date.now(), title: activeExam.title, score: score });
+          
+          forceKeluarUjian(); 
+          renderHistory(); 
+          switchTab("riwayat");
+        }
+        window.submitUjian = submitUjian;
+
         function forceKeluarUjian() { 
           clearInterval(examTimerInterval);
           activeExam = null; 
@@ -605,26 +628,11 @@
         }
         window.forceKeluarUjian = forceKeluarUjian;
 
-        function submitUjian() {
-          clearInterval(examTimerInterval); 
-          let benar = 0;
-          
-          activeExam.questions.forEach((q, i) => { 
-            if (userAnswers[i] !== undefined && parseInt(userAnswers[i]) === parseInt(q.answerIndex)) {
-              benar++; 
-            }
-          });
-          
-          const score = Math.round((benar / activeExam.questions.length) * 100);
-          window.resultsData.unshift({ id: Date.now(), title: activeExam.title, score: score });
-          forceKeluarUjian(); 
-          switchTab("riwayat");
-        }
-        window.submitUjian = submitUjian;
-
         function renderHistory() {
           const list = document.getElementById("history-list");
           const container = document.getElementById("stats-container");
+          if (!container || !list) return;
+
           container.innerHTML = `
             <div class="bg-surface-800 border border-slate-700 p-4 rounded-xl text-center"><div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Total Tes Selesai</div><div class="text-xl font-bold text-white mt-1 font-mono">${window.resultsData.length} Sesi</div></div>
             <div class="bg-surface-800 border border-slate-700 p-4 rounded-xl text-center"><div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Rerata Skor</div><div class="text-xl font-bold text-cyan-400 mt-1 font-mono">${window.resultsData.length ? Math.round(window.resultsData.reduce((a,c)=>a+c.score,0)/window.resultsData.length):0} Poin</div></div>
@@ -637,6 +645,7 @@
             return `<div class="bg-surface-800 border border-slate-700 p-4 rounded-xl flex justify-between items-center"><span class="text-xs font-semibold text-white truncate max-w-md">${r.title}</span><span class="font-mono text-xs font-bold ${r.score >= 70 ? 'text-emerald-400':'text-amber-400'} bg-surface-900 px-3 py-1.5 rounded-lg border border-slate-700">${r.score} Poin</span></div>`;
           }).join("");
         }
+        window.renderHistory = renderHistory;
 
         function renderSoalSementaraDOM() {
           const container = document.getElementById("questions-container");

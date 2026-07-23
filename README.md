@@ -10,20 +10,3 @@ KELOMPOK UJIAN AKHIR SEMESTER (UAS)
 8. Bryan Louis                    https://github.com/bluefire7860
 9. Fajar Hidayahtullah            https://github.com/fajarhm22
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

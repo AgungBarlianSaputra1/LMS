@@ -1,0 +1,1656 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>EduPulse · Platform Belajar Modern</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #0891b2, #2563eb);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            padding-bottom: 70px;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 0px;
+            }
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-effect {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(6, 182, 212, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            color: white;
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 12px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.2);
+            border-color: rgba(148, 163, 184, 0.4);
+        }
+
+        .input-field {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #e2e8f0;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #06b6d4;
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .progress-bar {
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            height: 8px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 85px;
+            right: 24px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 16px 24px;
+            color: #e2e8f0;
+            font-size: 14px;
+            z-index: 2000;
+            animation: slideInRight 0.4s ease;
+        }
+
+        @media (min-width: 768px) {
+            .notification {
+                bottom: 24px;
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-button.active {
+            color: #06b6d4;
+            border-bottom-color: #06b6d4;
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .exam-option-label {
+            position: relative;
+            background: rgba(30, 41, 59, 0.6);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .exam-option-label:hover {
+            border-color: rgba(6, 182, 212, 0.5);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .exam-option-label.selected-answer {
+            border-color: #06b6d4 !important;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.18), rgba(6, 182, 212, 0.08)) !important;
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.28), 0 10px 24px rgba(6, 182, 212, 0.16);
+            transform: translateY(-1px);
+        }
+
+        .timer {
+            font-size: 24px;
+            font-weight: 700;
+            color: #06b6d4;
+        }
+
+        .shine-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shine-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: rgba(6, 182, 212, 0.3);
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 280px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(148, 163, 184, 0.2);
+            z-index: 1050;
+            transition: left 0.3s ease-in-out;
+        }
+
+        .drawer.open {
+            left: 0;
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1040;
+            display: none;
+        }
+
+        .drawer-overlay.active {
+            display: block;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bottom-nav-item i {
+            font-size: 18px;
+            margin-bottom: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .bottom-nav-item.active {
+            color: #06b6d4;
+            font-weight: 600;
+        }
+
+        .bottom-nav-item.active i {
+            transform: translateY(-2px);
+            color: #06b6d4;
+            filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.6));
+        }
+
+        body.light-mode {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
+            color: #1e293b;
+        }
+
+        body.light-mode .glass-effect {
+            background: rgba(248, 250, 252, 0.8);
+            border: 1px solid rgba(51, 65, 85, 0.1);
+        }
+
+        body.light-mode .drawer {
+            background: rgba(248, 250, 252, 0.98);
+            border-right-color: rgba(51, 65, 85, 0.2);
+        }
+
+        body.light-mode .bottom-nav-item {
+            color: #64748b;
+        }
+
+        body.light-mode .bottom-nav-item.active {
+            color: #0284c7;
+        }
+
+        body.light-mode .bottom-nav-item.active i {
+            color: #0284c7;
+            filter: drop-shadow(0 0 8px rgba(2, 132, 199, 0.4));
+        }
+
+        body.light-mode .exam-option-label {
+            background: rgba(241, 245, 249, 0.8);
+            border-color: rgba(203, 213, 225, 0.8);
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <div id="drawer-overlay" class="drawer-overlay" onclick="toggleDrawer(false)"></div>
+
+    <aside id="burger-drawer" class="drawer flex flex-col p-6 justify-between">
+        <div>
+            <div class="flex items-center justify-between pb-6 mb-6 border-b border-slate-700/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                        <i class="fas fa-book text-white text-base"></i>
+                    </div>
+                    <span class="font-bold text-lg gradient-text">EduPulse</span>
+                </div>
+                <button onclick="toggleDrawer(false)" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button class="drawer-btn tab-button text-left w-full active" onclick="switchSection('home'); toggleDrawer(false)">
+                    <i class="fas fa-home mr-3 w-5"></i>Beranda
+                </button>
+                <button class="drawer-btn tab-button text-left w-full" onclick="switchSection('articles'); toggleDrawer(false)">
+                    <i class="fas fa-newspaper mr-3 w-5"></i>Artikel
+                </button>
+                <button class="drawer-btn tab-button text-left w-full" onclick="switchSection('exams'); toggleDrawer(false)">
+                    <i class="fas fa-pencil mr-3 w-5"></i>Ujian
+                </button>
+                <button class="drawer-btn tab-button text-left w-full" onclick="switchSection('results'); toggleDrawer(false)">
+                    <i class="fas fa-chart-bar mr-3 w-5"></i>Statistik
+                </button>
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-slate-700/50">
+            <button onclick="openModal('auth'); toggleDrawer(false)" class="btn-secondary w-full text-xs flex items-center justify-center gap-2">
+                <i class="fas fa-sign-in-alt"></i> Masuk / Buat Akun
+            </button>
+        </div>
+    </aside>
+
+    <nav class="glass-effect sticky top-0 z-50 border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleDrawer(true)" class="md:hidden p-2 text-slate-300 hover:text-white text-xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                        <i class="fas fa-book text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">EduPulse</h1>
+                        <p class="text-xs text-slate-400">Platform Belajar Modern</p>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex items-center gap-2">
+                    <button class="tab-button active" onclick="switchSection('home')">
+                        <i class="fas fa-home mr-2"></i>Beranda
+                    </button>
+                    <button class="tab-button" onclick="switchSection('articles')">
+                        <i class="fas fa-newspaper mr-2"></i>Artikel
+                    </button>
+                    <button class="tab-button" onclick="switchSection('exams')">
+                        <i class="fas fa-pencil mr-2"></i>Ujian
+                    </button>
+                    <button class="tab-button" onclick="switchSection('results')">
+                        <i class="fas fa-chart-bar mr-2"></i>Statistik
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button id="theme-toggle-btn" onclick="toggleTheme()" class="btn-secondary p-3 w-10 h-10 flex items-center justify-center" title="Ubah Mode Tampilan">
+                        <i id="theme-icon" class="fas fa-moon"></i>
+                    </button>
+
+                    <div class="hidden sm:flex items-center gap-3 glass-effect px-3 py-1.5 rounded-xl border border-slate-700/50">
+                        <div class="text-right">
+                            <p class="text-[10px] text-slate-400 leading-tight">Masuk Sebagai:</p>
+                            <p id="nav-role-badge" class="text-xs font-bold text-cyan-400">admin</p>
+                        </div>
+                        <button onclick="openModal('auth')" title="Ganti Akun / Buat Akun" class="btn-primary text-xs py-1.5 px-3">
+                            <i class="fas fa-user mr-1"></i> Akun
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section id="home-section" class="space-y-12">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                        Belajar Lebih <span class="gradient-text">Efektif</span>
+                    </h1>
+                    <p class="text-lg text-slate-400 mb-8">Platform pembelajaran interaktif dengan materi berkualitas tinggi, ujian dinamis, dan tracking progress real-time untuk kesuksesan akademik Anda.</p>
+                    <div class="flex gap-4">
+                        <button onclick="switchSection('articles')" class="btn-primary">
+                            <i class="fas fa-arrow-right mr-2"></i>Mulai Belajar
+                        </button>
+                        <button onclick="switchSection('exams')" class="btn-secondary">
+                            <i class="fas fa-flask mr-2"></i>Coba Ujian
+                        </button>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="glass-effect p-8 rounded-2xl">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="stat-card shine-effect">
+                                <i class="fas fa-book text-cyan-400 text-3xl mb-3"></i>
+                                <p class="text-3xl font-bold">2000+</p>
+                                <p class="text-sm text-slate-400">Materi Pembelajaran</p>
+                            </div>
+                            <div class="stat-card shine-effect">
+                                <i class="fas fa-pencil text-blue-400 text-3xl mb-3"></i>
+                                <p class="text-3xl font-bold">500+</p>
+                                <p class="text-sm text-slate-400">Ujian Tersedia</p>
+                            </div>
+                            <div class="stat-card shine-effect">
+                                <i class="fas fa-users text-purple-400 text-3xl mb-3"></i>
+                                <p class="text-3xl font-bold">10K+</p>
+                                <p class="text-sm text-slate-400">Pengguna Aktif</p>
+                            </div>
+                            <div class="stat-card shine-effect">
+                                <i class="fas fa-trophy text-yellow-400 text-3xl mb-3"></i>
+                                <p class="text-3xl font-bold">95%</p>
+                                <p class="text-sm text-slate-400">Kepuasan Pengguna</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="articles-section" class="hidden space-y-6">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold gradient-text">Perpustakaan Artikel</h2>
+                <button id="create-article-btn" onclick="openCreateArticleModal()" class="btn-primary hidden">
+                    <i class="fas fa-plus mr-2"></i>Buat Artikel
+                </button>
+            </div>
+
+            <div class="flex gap-4 mb-6">
+                <input type="text" id="search-articles" placeholder="🔍 Cari artikel..." class="input-field flex-1" oninput="filterArticles()">
+                <select id="category-filter" class="input-field" onchange="filterArticles()">
+                    <option value="">Semua Kategori</option>
+                    <option value="programming">Pemrograman</option>
+                    <option value="math">Matematika</option>
+                    <option value="science">Sains</option>
+                </select>
+            </div>
+
+            <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Memuat artikel...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- BAGIAN UJIAN (FIXED EXACT INDEX 31 VALIDATION & MAPPING LOGIC) -->
+        <section id="exams-section" class="hidden space-y-6">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold gradient-text">Bank Ujian</h2>
+                <button id="create-exam-btn" onclick="openCreateExamModal()" class="btn-primary hidden">
+                    <i class="fas fa-plus mr-2"></i>Buat Ujian
+                </button>
+            </div>
+
+            <div class="flex gap-4 mb-6">
+                <input type="text" id="search-exams" placeholder="🔍 Cari ujian..." class="input-field flex-1" oninput="filterExams()">
+                <select id="level-filter" class="input-field" onchange="filterExams()">
+                    <option value="">Semua Level</option>
+                    <option value="easy">Mudah</option>
+                    <option value="medium">Sedang</option>
+                    <option value="hard">Sulit</option>
+                </select>
+            </div>
+
+            <div id="exams-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Memuat ujian...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="results-section" class="hidden space-y-6">
+            <h2 class="text-3xl font-bold gradient-text mb-8">Statistik & Riwayat</h2>
+
+            <div id="summary-stats" class="grid md:grid-cols-4 gap-4 mb-8">
+                <div class="stat-card">
+                    <i class="fas fa-pencil text-cyan-400 text-2xl mb-2"></i>
+                    <p class="text-2xl font-bold" id="total-exams">0</p>
+                    <p class="text-sm text-slate-400">Total Ujian</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check text-green-400 text-2xl mb-2"></i>
+                    <p class="text-2xl font-bold" id="avg-score">0%</p>
+                    <p class="text-sm text-slate-400">Rata-rata Skor</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-fire text-orange-400 text-2xl mb-2"></i>
+                    <p class="text-2xl font-bold" id="best-score">0%</p>
+                    <p class="text-sm text-slate-400">Skor Terbaik</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock text-purple-400 text-2xl mb-2"></i>
+                    <p class="text-2xl font-bold" id="total-time">0h</p>
+                    <p class="text-sm text-slate-400">Total Waktu</p>
+                </div>
+            </div>
+
+            <div class="glass-effect p-6 rounded-2xl">
+                <h3 class="text-xl font-bold mb-4">Riwayat Ujian Pengerja</h3>
+                <div id="results-list" class="space-y-3">
+                    <div class="empty-state">
+                        <p>Belum ada riwayat ujian</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="md:hidden fixed bottom-0 left-0 right-0 glass-effect border-t border-slate-700/50 z-40 h-16 px-4">
+        <div class="grid grid-cols-5 h-full items-center">
+            <button onclick="switchSection('home')" class="bottom-nav-item active" data-section="home">
+                <i class="fas fa-home"></i>
+                <span>Beranda</span>
+            </button>
+            <button onclick="switchSection('articles')" class="bottom-nav-item" data-section="articles">
+                <i class="fas fa-newspaper"></i>
+                <span>Artikel</span>
+            </button>
+            <button onclick="switchSection('exams')" class="bottom-nav-item" data-section="exams">
+                <i class="fas fa-pencil"></i>
+                <span>Ujian</span>
+            </button>
+            <button onclick="switchSection('results')" class="bottom-nav-item" data-section="results">
+                <i class="fas fa-chart-bar"></i>
+                <span>Statistik</span>
+            </button>
+            <button onclick="openModal('auth')" class="bottom-nav-item" data-section="auth">
+                <i class="fas fa-user"></i>
+                <span>Akun</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL AUTH, CREATE ARTICLE, CREATE EXAM, EXAM PLAYER & RESULTS -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content max-w-md relative">
+            <button onclick="closeModal('auth')" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <div class="flex gap-4 border-b border-slate-700/60 pb-3 mb-6">
+                <button id="auth-tab-login" onclick="switchAuthTab('login')" class="font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1">Masuk Akun</button>
+                <button id="auth-tab-register" onclick="switchAuthTab('register')" class="font-bold text-lg text-slate-400 pb-1">Buat Akun</button>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Username</label>
+                    <input type="text" id="login-username" class="input-field w-full" placeholder="Masukkan username" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2">Password</label>
+                    <input type="password" id="login-password" class="input-field w-full" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Masuk
+                </button>
+            </form>
+
+            <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Username Baru</label>
+                    <input type="text" id="register-username" class="input-field w-full" placeholder="Buat username" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Email</label>
+                    <input type="email" id="register-email" class="input-field w-full" placeholder="Masukkan email" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2">Password Baru</label>
+                    <input type="password" id="register-password" class="input-field w-full" placeholder="Buat password" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">
+                    <i class="fas fa-user-plus mr-2"></i>Daftar Akun Baru
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="create-article-modal" class="modal-overlay">
+        <div class="modal-content max-w-2xl">
+            <h2 id="modal-article-title" class="text-2xl font-bold mb-6 gradient-text">Buat Artikel Baru</h2>
+            <form onsubmit="handleSaveArticle(event)">
+                <input type="hidden" id="edit-article-id">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Judul Artikel</label>
+                    <input type="text" id="article-title" class="input-field w-full" placeholder="Judul artikel" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Kategori</label>
+                    <select id="article-category" class="input-field w-full" required>
+                        <option value="programming">Pemrograman</option>
+                        <option value="math">Matematika</option>
+                        <option value="science">Sains</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2">Isi Artikel</label>
+                    <textarea id="article-content" class="input-field w-full" rows="8" placeholder="Tulis isi artikel..." required></textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-primary flex-1"><i class="fas fa-save mr-2"></i>Simpan</button>
+                    <button type="button" onclick="closeModal('create-article')" class="btn-secondary flex-1">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL BUAT / EDIT UJIAN -->
+    <div id="create-exam-modal" class="modal-overlay">
+        <div class="modal-content max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 id="modal-exam-title" class="text-2xl font-bold mb-6 gradient-text">Buat Ujian Baru (Pilihan Ganda)</h2>
+
+            <form onsubmit="handleSaveExam(event)">
+                <input type="hidden" id="edit-exam-id">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Judul Ujian</label>
+                    <input type="text" id="exam-title" class="input-field w-full" placeholder="Contoh: Ujian Matematika Dasar" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Level Kesulitan</label>
+                        <select id="exam-level" class="input-field w-full" required>
+                            <option value="easy">Mudah</option>
+                            <option value="medium">Sedang</option>
+                            <option value="hard">Sulit</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Durasi (menit)</label>
+                        <input type="number" id="exam-duration" class="input-field w-full" value="30" min="1" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Deskripsi</label>
+                    <textarea id="exam-description" class="input-field w-full" rows="2" placeholder="Deskripsi singkat ujian"></textarea>
+                </div>
+
+                <div class="border-t border-slate-700/60 pt-4 mt-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-cyan-400"><i class="fas fa-list-ol mr-2"></i>Daftar Soal Pilihan Ganda</h3>
+                        <button type="button" onclick="addQuestionItem()" class="btn-secondary text-xs py-2 px-3">
+                            <i class="fas fa-plus mr-1"></i>Tambah Soal
+                        </button>
+                    </div>
+
+                    <div id="questions-list-container" class="space-y-6"></div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-primary flex-1">
+                        <i class="fas fa-save mr-2"></i>Simpan Ujian
+                    </button>
+                    <button type="button" onclick="closeModal('create-exam')" class="btn-secondary flex-1">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PLAYER UJIAN -->
+    <div id="exam-player-modal" class="modal-overlay">
+        <div class="modal-content max-w-4xl max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700">
+                <h2 id="exam-player-title" class="text-2xl font-bold gradient-text"></h2>
+                <div class="flex items-center gap-4">
+                    <div class="text-center">
+                        <p class="text-xs text-slate-400">Waktu Tersisa</p>
+                        <p id="exam-timer" class="timer text-2xl font-bold">00:00</p>
+                    </div>
+                    <button onclick="closeModal('exam-player')" class="text-slate-400 hover:text-white">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="progress-bar">
+                    <div id="exam-progress" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <p class="text-xs text-slate-400 mt-2"><span id="exam-question-count">0</span>/<span id="exam-total-questions">0</span> pertanyaan</p>
+            </div>
+
+            <div id="exam-questions-container" class="space-y-6 mb-6"></div>
+
+            <div class="flex justify-between gap-4">
+                <button id="btn-prev-question" onclick="previousQuestion()" class="btn-secondary flex-1 hidden">
+                    <i class="fas fa-chevron-left mr-2"></i>Sebelumnya
+                </button>
+                <button id="btn-next-question" onclick="nextQuestion()" class="btn-primary flex-1 hidden">
+                    Selanjutnya<i class="fas fa-chevron-right ml-2"></i>
+                </button>
+            </div>
+
+            <button onclick="submitExam()" class="btn-primary w-full mt-4">
+                <i class="fas fa-check mr-2"></i>Selesaikan Ujian
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL HASIL UJIAN -->
+    <div id="exam-results-modal" class="modal-overlay">
+        <div class="modal-content max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-6 gradient-text text-center">Hasil Ujian</h2>
+
+            <div id="results-summary" class="glass-effect p-6 rounded-2xl text-center mb-6">
+                <div class="text-6xl font-bold gradient-text mb-2" id="final-score">0%</div>
+                <p id="score-status" class="text-lg font-semibold mb-4"></p>
+                <div class="flex justify-between text-sm">
+                    <div>
+                        <p class="text-slate-400">Soal Benar</p>
+                        <p class="text-xl font-bold text-green-400" id="correct-count">0</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-400">Soal Salah</p>
+                        <p class="text-xl font-bold text-red-400" id="wrong-count">0</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-400">Waktu Tempuh</p>
+                        <p class="text-xl font-bold text-cyan-400" id="time-taken">0m</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-lg font-bold mb-3 gradient-text"><i class="fas fa-list-check mr-2"></i>Evaluasi Jawaban</h3>
+                <div id="answers-review-container" class="space-y-4"></div>
+            </div>
+
+            <button onclick="closeModal('exam-results'); switchSection('exams')" class="btn-primary w-full">
+                <i class="fas fa-arrow-left mr-2"></i>Kembali ke Bank Ujian
+            </button>
+        </div>
+    </div>
+
+    <div id="article-detail-modal" class="modal-overlay">
+        <div class="modal-content max-w-2xl max-h-[90vh] overflow-y-auto relative">
+            <button onclick="closeModal('article-detail')" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h2 id="article-detail-title" class="text-2xl font-bold mb-2 gradient-text"></h2>
+            <p id="article-detail-meta" class="text-sm text-slate-400 mb-6"></p>
+            <div id="article-detail-content" class="prose text-slate-300 mb-8 leading-relaxed"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_API_URL = "https://lms.agungbarliansaputra.workers.dev/api";
+        const JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.QMUFsIDTnFmyG3nMiGM6SDlOWk5GTlVSR0Yzd2g3U21xSnAtUXYzMA";
+
+        const defaultAdmin = { id: "admin-1", username: "admin", email: "admin@edupulse.com", password: "123456789", isAdmin: true };
+
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [defaultAdmin];
+        if (!registeredUsers.some(u => u.username === 'admin')) {
+            registeredUsers.push(defaultAdmin);
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+        }
+
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || registeredUsers[0]; 
+
+        let articlesData = [];
+        let examsData = [];
+        let resultsData = JSON.parse(localStorage.getItem('resultsData')) || [];
+
+        let currentExam = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let examTimeRemaining = 0;
+        let examInterval = null;
+
+        // FUNGSI VALIDASI / PENCOCOKAN JAWABAN (FIXED INDEX 31 SYNC)
+        function validateAnswer(question, selectedIdx) {
+            if (selectedIdx === undefined || selectedIdx === null) return false;
+            const key = question.correctAnswer;
+            
+            // 1. Jika index numerik persis sama (misal 0 === 0)
+            if (Number(selectedIdx) === Number(key)) return true;
+
+            // 2. Jika kunci jawaban disimpan dalam format huruf kapital ("A", "B", "C", "D")
+            const letters = ["A", "B", "C", "D"];
+            if (letters[Number(selectedIdx)] === String(key).trim().toUpperCase()) return true;
+
+            // 3. Jika kunci jawaban disimpan sebagai string teks opsi pilihan itu sendiri
+            if (question.options && question.options[Number(selectedIdx)] !== undefined) {
+                if (String(question.options[Number(selectedIdx)]).trim().toLowerCase() === String(key).trim().toLowerCase()) return true;
+            }
+
+            return false;
+        }
+
+        function init() {
+            updateAuthUI();
+            loadArticles();
+            loadExams();
+            loadResults();
+            applySavedTheme();
+        }
+
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const tabLogin = document.getElementById('auth-tab-login');
+            const tabRegister = document.getElementById('auth-tab-register');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabLogin.className = "font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1";
+                tabRegister.className = "font-bold text-lg text-slate-400 pb-1";
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabRegister.className = "font-bold text-lg text-cyan-400 border-b-2 border-cyan-400 pb-1";
+                tabLogin.className = "font-bold text-lg text-slate-400 pb-1";
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('login-username').value.trim();
+            const passwordInput = document.getElementById('login-password').value.trim();
+            const foundUser = registeredUsers.find(u => u.username === usernameInput && u.password === passwordInput);
+
+            if (foundUser) {
+                currentUser = foundUser;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showNotification(`Berhasil masuk sebagai ${currentUser.username}`);
+                updateAuthUI();
+                renderArticles();
+                renderExams();
+                renderResults();
+                document.getElementById('login-form').reset();
+                closeModal('auth');
+            } else {
+                showNotification('Username atau password salah!');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('register-username').value.trim();
+            const emailInput = document.getElementById('register-email').value.trim();
+            const passwordInput = document.getElementById('register-password').value.trim();
+
+            if (registeredUsers.some(u => u.username === usernameInput)) {
+                return showNotification('Username sudah digunakan!');
+            }
+
+            const newUser = {
+                id: 'user-' + Date.now(),
+                username: usernameInput,
+                email: emailInput,
+                password: passwordInput,
+                isAdmin: false
+            };
+
+            registeredUsers.push(newUser);
+            currentUser = newUser;
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            showNotification(`Akun berhasil dibuat! Selamat datang, ${currentUser.username}`);
+            updateAuthUI();
+            renderArticles();
+            renderExams();
+            renderResults();
+            document.getElementById('register-form').reset();
+            closeModal('auth');
+        }
+
+        function updateAuthUI() {
+            const roleBadge = document.getElementById('nav-role-badge');
+            const createArticleBtn = document.getElementById('create-article-btn');
+            const createExamBtn = document.getElementById('create-exam-btn');
+
+            roleBadge.textContent = currentUser.username;
+            if (currentUser.isAdmin) {
+                roleBadge.className = "text-xs font-bold text-cyan-400";
+                createArticleBtn.classList.remove('hidden');
+                createExamBtn.classList.remove('hidden');
+            } else {
+                roleBadge.className = "text-xs font-bold text-amber-400";
+                createArticleBtn.classList.add('hidden');
+                createExamBtn.classList.add('hidden');
+            }
+        }
+
+        function toggleDrawer(open) {
+            const drawer = document.getElementById('burger-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if (open) {
+                drawer.classList.add('open');
+                overlay.classList.add('active');
+            } else {
+                drawer.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark-mode');
+            setTheme(isDark ? 'light' : 'dark');
+        }
+
+        function setTheme(mode) {
+            const themeIcon = document.getElementById('theme-icon');
+            if (mode === 'light') {
+                document.body.classList.remove('dark-mode');
+                document.body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+                if (themeIcon) themeIcon.className = "fas fa-sun text-yellow-500";
+            } else {
+                document.body.classList.remove('light-mode');
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                if (themeIcon) themeIcon.className = "fas fa-moon text-cyan-400";
+            }
+        }
+
+        function applySavedTheme() {
+            setTheme(localStorage.getItem('theme') || 'dark');
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll(`button[onclick*="'${section}'"]`).forEach(btn => btn.classList.add('active'));
+
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                if(item.getAttribute('data-section') === section) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function openModal(id) {
+            document.getElementById(`${id}-modal`).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(`${id}-modal`).classList.remove('active');
+            if(id === 'exam-player' && examInterval) clearInterval(examInterval);
+            if(id === 'auth') {
+                document.getElementById('login-form').reset();
+                document.getElementById('register-form').reset();
+            }
+        }
+
+        async function loadArticles() {
+            try {
+                const res = await fetch(`${BASE_API_URL}/articles`, { headers: { Authorization: `Bearer ${JWT_TOKEN}` } });
+                const data = await res.json();
+                if (data.success) {
+                    articlesData = data.data || [];
+                    renderArticles();
+                }
+            } catch (error) { console.error('Error loading articles:', error); }
+        }
+
+        function renderArticles() {
+            const grid = document.getElementById('articles-grid');
+            const searchTerm = document.getElementById('search-articles')?.value.toLowerCase() || '';
+            const category = document.getElementById('category-filter')?.value || '';
+
+            let filtered = articlesData.filter(a => {
+                return (a.title.toLowerCase().includes(searchTerm) || a.content.toLowerCase().includes(searchTerm)) && (!category || a.category === category);
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="col-span-full empty-state"><i class="fas fa-search"></i><p>Tidak ada artikel ditemukan</p></div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(article => `
+                <div class="glass-effect p-6 rounded-2xl card-hover cursor-pointer relative" onclick="viewArticle('${article.id}')">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="badge badge-success">${article.category || 'Umum'}</span>
+                        ${currentUser?.isAdmin ? `
+                            <div class="flex items-center gap-2">
+                                <button onclick="openEditArticleModal('${article.id}'); event.stopPropagation();" class="text-cyan-400 hover:text-cyan-300 p-1" title="Edit Artikel"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteArticle('${article.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300 p-1" title="Hapus Artikel"><i class="fas fa-trash"></i></button>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <h3 class="text-lg font-bold mb-2 line-clamp-2">${article.title}</h3>
+                    <p class="text-slate-400 text-sm line-clamp-3 mb-4">${article.content}</p>
+                </div>
+            `).join('');
+        }
+
+        function filterArticles() { renderArticles(); }
+
+        function viewArticle(id) {
+            const article = articlesData.find(a => a.id === id);
+            if (!article) return;
+            document.getElementById('article-detail-title').textContent = article.title;
+            document.getElementById('article-detail-meta').textContent = article.category || 'Umum';
+            document.getElementById('article-detail-content').innerHTML = article.content.replace(/\n/g, '<br>');
+            openModal('article-detail');
+        }
+
+        function openCreateArticleModal() {
+            if (!currentUser?.isAdmin) return showNotification('Hanya admin yang memiliki izin ini');
+            document.getElementById('modal-article-title').textContent = "Buat Artikel Baru";
+            document.getElementById('edit-article-id').value = "";
+            document.getElementById('article-title').value = "";
+            document.getElementById('article-category').value = "programming";
+            document.getElementById('article-content').value = "";
+            openModal('create-article');
+        }
+
+        function openEditArticleModal(id) {
+            if (!currentUser?.isAdmin) return showNotification('Hanya admin yang memiliki izin ini');
+            const article = articlesData.find(a => a.id === id);
+            if (!article) return;
+            document.getElementById('modal-article-title').textContent = "Edit Artikel";
+            document.getElementById('edit-article-id').value = article.id;
+            document.getElementById('article-title').value = article.title;
+            document.getElementById('article-category').value = article.category || 'programming';
+            document.getElementById('article-content').value = article.content;
+            openModal('create-article');
+        }
+
+        async function handleSaveArticle(e) {
+            e.preventDefault();
+            const articleId = document.getElementById('edit-article-id').value;
+            const articleData = {
+                title: document.getElementById('article-title').value,
+                category: document.getElementById('article-category').value,
+                content: document.getElementById('article-content').value
+            };
+
+            try {
+                let url = `${BASE_API_URL}/articles`;
+                let method = 'POST';
+                if (articleId) { url += `/${articleId}`; method = 'PUT'; }
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${JWT_TOKEN}` },
+                    body: JSON.stringify(articleData)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await loadArticles();
+                    closeModal('create-article');
+                    showNotification(articleId ? 'Artikel berhasil diperbarui' : 'Artikel berhasil dibuat');
+                }
+            } catch (error) { showNotification('Gagal menyimpan artikel'); }
+        }
+
+        async function deleteArticle(id) {
+            if (!currentUser?.isAdmin) return showNotification('Hanya admin yang dapat menghapus artikel');
+            if (!confirm('Hapus artikel ini?')) return;
+            try {
+                const res = await fetch(`${BASE_API_URL}/articles/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${JWT_TOKEN}` } });
+                const data = await res.json();
+                if (data.success) { await loadArticles(); showNotification('Artikel berhasil dihapus'); }
+            } catch (error) { showNotification('Gagal menghapus artikel'); }
+        }
+
+        async function loadExams() {
+            try {
+                const res = await fetch(`${BASE_API_URL}/exams`, { headers: { Authorization: `Bearer ${JWT_TOKEN}` } });
+                const data = await res.json();
+                if (data.success) {
+                    examsData = data.data || [];
+                    renderExams();
+                }
+            } catch (error) { console.error('Error loading exams:', error); }
+        }
+
+        function renderExams() {
+            const grid = document.getElementById('exams-grid');
+            const searchTerm = document.getElementById('search-exams')?.value.toLowerCase() || '';
+            const level = document.getElementById('level-filter')?.value || '';
+
+            let filtered = examsData.filter(e => {
+                return e.title.toLowerCase().includes(searchTerm) && (!level || e.level === level);
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="col-span-full empty-state"><i class="fas fa-search"></i><p>Tidak ada ujian ditemukan</p></div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(exam => `
+                <div class="glass-effect p-6 rounded-2xl card-hover relative">
+                    <div class="flex items-start justify-between mb-3">
+                        <span class="badge ${exam.level === 'easy' ? 'badge-success' : exam.level === 'medium' ? 'badge-warning' : 'badge-danger'}">${exam.level}</span>
+                        ${currentUser?.isAdmin ? `
+                            <div class="flex items-center gap-2">
+                                <button onclick="openEditExamModal('${exam.id}'); event.stopPropagation();" class="text-cyan-400 hover:text-cyan-300 p-1" title="Edit Ujian"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteExam('${exam.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300 p-1" title="Hapus Ujian"><i class="fas fa-trash"></i></button>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">${exam.title}</h3>
+                    <p class="text-slate-400 text-sm mb-4">${exam.description || 'Tanpa deskripsi'}</p>
+                    <div class="flex justify-between items-center mb-4 text-sm text-slate-400">
+                        <span><i class="fas fa-question-circle mr-1"></i>${exam.questions?.length || 0} soal</span>
+                        <span><i class="fas fa-clock mr-1"></i>${exam.duration} menit</span>
+                    </div>
+                    <button onclick="startExam('${exam.id}')" class="btn-primary w-full">
+                        <i class="fas fa-play mr-2"></i>Mulai Ujian
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterExams() { renderExams(); }
+
+        function addQuestionItem(questionData = null) {
+            const container = document.getElementById('questions-list-container');
+            const qIndex = container.children.length;
+            const qText = questionData ? questionData.text || '' : '';
+            const opts = questionData && questionData.options ? questionData.options : ['', '', '', ''];
+            const correctOpt = questionData && questionData.correctAnswer !== undefined ? questionData.correctAnswer : 0;
+
+            const qCard = document.createElement('div');
+            qCard.className = 'question-item-card glass-effect p-4 rounded-xl border border-slate-700/60 relative';
+            qCard.setAttribute('data-q-index', qIndex);
+
+            qCard.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-bold text-sm text-cyan-400">Soal #${qIndex + 1}</span>
+                    <button type="button" onclick="removeQuestionItem(this)" class="text-red-400 hover:text-red-300 text-xs px-2 py-1"><i class="fas fa-trash mr-1"></i>Hapus Soal</button>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold mb-1">Pertanyaan</label>
+                    <input type="text" class="q-input-text input-field w-full" placeholder="Masukkan pertanyaan..." value="${qText}" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div><label class="block text-xs font-semibold mb-1">Pilihan A</label><input type="text" class="q-opt-0 input-field w-full" placeholder="Opsi A" value="${opts[0] || ''}" required></div>
+                    <div><label class="block text-xs font-semibold mb-1">Pilihan B</label><input type="text" class="q-opt-1 input-field w-full" placeholder="Opsi B" value="${opts[1] || ''}" required></div>
+                    <div><label class="block text-xs font-semibold mb-1">Pilihan C</label><input type="text" class="q-opt-2 input-field w-full" placeholder="Opsi C" value="${opts[2] || ''}" required></div>
+                    <div><label class="block text-xs font-semibold mb-1">Pilihan D</label><input type="text" class="q-opt-3 input-field w-full" placeholder="Opsi D" value="${opts[3] || ''}" required></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Kunci Jawaban Benar</label>
+                    <select class="q-correct-opt input-field w-full" required>
+                        <option value="0" ${correctOpt == 0 ? 'selected' : ''}>Pilihan A</option>
+                        <option value="1" ${correctOpt == 1 ? 'selected' : ''}>Pilihan B</option>
+                        <option value="2" ${correctOpt == 2 ? 'selected' : ''}>Pilihan C</option>
+                        <option value="3" ${correctOpt == 3 ? 'selected' : ''}>Pilihan D</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(qCard);
+            updateQuestionNumbers();
+        }
+
+        function removeQuestionItem(btn) {
+            const container = document.getElementById('questions-list-container');
+            if (container.children.length <= 1) { return showNotification('Ujian minimal harus memiliki 1 soal!'); }
+            btn.closest('.question-item-card').remove();
+            updateQuestionNumbers();
+        }
+
+        function updateQuestionNumbers() {
+            document.querySelectorAll('#questions-list-container .question-item-card').forEach((card, index) => {
+                card.querySelector('.font-bold.text-sm').textContent = `Soal #${index + 1}`;
+            });
+        }
+
+        function openCreateExamModal() {
+            if (!currentUser?.isAdmin) return showNotification('Hanya admin yang dapat membuat ujian');
+            document.getElementById('modal-exam-title').textContent = "Buat Ujian Baru (Pilihan Ganda)";
+            document.getElementById('edit-exam-id').value = "";
+            document.getElementById('exam-title').value = "";
+            document.getElementById('exam-level').value = "easy";
+            document.getElementById('exam-duration').value = 30;
+            document.getElementById('exam-description').value = "";
+            document.getElementById('questions-list-container').innerHTML = "";
+            addQuestionItem();
+            openModal('create-exam');
+        }
+
+        function openEditExamModal(id) {
+            if (!currentUser?.isAdmin) return showNotification('Hanya admin yang dapat mengedit ujian');
+            const exam = examsData.find(e => e.id === id);
+            if (!exam) return;
+
+            document.getElementById('modal-exam-title').textContent = "Edit Ujian";
+            document.getElementById('edit-exam-id').value = exam.id;
+            document.getElementById('exam-title').value = exam.title || "";
+            document.getElementById('exam-level').value = exam.level || "easy";
+            document.getElementById('exam-duration').value = exam.duration || 30;
+            document.getElementById('exam-description').value = exam.description || "";
+
+            const container = document.getElementById('questions-list-container');
+            container.innerHTML = "";
+            if (exam.questions && Array.isArray(exam.questions) && exam.questions.length > 0) {
+                exam.questions.forEach(q => addQuestionItem(q));
+            } else { addQuestionItem(); }
+            openModal('create-exam');
+        }
+
+        async function handleSaveExam(e) {
+            e.preventDefault();
+            const examId = document.getElementById('edit-exam-id').value;
+            const questions = [];
+
+            document.querySelectorAll('.question-item-card').forEach(card => {
+                questions.push({
+                    text: card.querySelector('.q-input-text').value,
+                    options: [
+                        card.querySelector('.q-opt-0').value,
+                        card.querySelector('.q-opt-1').value,
+                        card.querySelector('.q-opt-2').value,
+                        card.querySelector('.q-opt-3').value
+                    ],
+                    correctAnswer: parseInt(card.querySelector('.q-correct-opt').value)
+                });
+            });
+
+            const examData = {
+                title: document.getElementById('exam-title').value,
+                level: document.getElementById('exam-level').value,
+                duration: parseInt(document.getElementById('exam-duration').value),
+                description: document.getElementById('exam-description').value,
+                questions: questions
+            };
+
+            try {
+                let url = `${BASE_API_URL}/exams`;
+                let method = 'POST';
+                if (examId) { url += `/${examId}`; method = 'PUT'; }
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${JWT_TOKEN}` },
+                    body: JSON.stringify(examData)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await loadExams();
+                    closeModal('create-exam');
+                    showNotification(examId ? 'Ujian berhasil diperbarui!' : 'Ujian pilihan ganda berhasil dibuat!');
+                }
+            } catch (error) { showNotification('Gagal menyimpan ujian'); }
+        }
+
+        async function deleteExam(id) {
+            if (!currentUser?.isAdmin) return showNotification('Hanya admin yang dapat menghapus ujian');
+            if (!confirm('Hapus ujian ini?')) return;
+            try {
+                const res = await fetch(`${BASE_API_URL}/exams/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${JWT_TOKEN}` } });
+                const data = await res.json();
+                if (data.success) { await loadExams(); showNotification('Ujian berhasil dihapus'); }
+            } catch (error) { showNotification('Gagal menghapus ujian'); }
+        }
+
+        function startExam(examId) {
+            const exam = examsData.find(e => e.id === examId);
+            if (!exam) return;
+
+            currentExam = exam;
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            examTimeRemaining = exam.duration * 60;
+
+            document.getElementById('exam-player-title').textContent = exam.title;
+            document.getElementById('exam-total-questions').textContent = exam.questions?.length || 0;
+
+            renderExamQuestion();
+            startExamTimer();
+            openModal('exam-player');
+        }
+
+        function renderExamQuestion() {
+            if (!currentExam || !currentExam.questions || currentExam.questions.length === 0) {
+                document.getElementById('exam-questions-container').innerHTML = '<p class="text-center text-slate-400">Belum ada soal pada ujian ini.</p>';
+                document.getElementById('btn-prev-question').classList.add('hidden');
+                document.getElementById('btn-next-question').classList.add('hidden');
+                return;
+            }
+
+            const totalQuestions = currentExam.questions.length;
+            const question = currentExam.questions[currentQuestionIndex];
+            
+            document.getElementById('exam-question-count').textContent = currentQuestionIndex + 1;
+            document.getElementById('exam-progress').style.width = ((currentQuestionIndex + 1) / totalQuestions) * 100 + '%';
+
+            const container = document.getElementById('exam-questions-container');
+            container.innerHTML = `
+                <div>
+                    <h3 class="text-lg font-bold mb-6">${question.text}</h3>
+                    <div class="space-y-3">
+                        ${question.options.map((option, idx) => {
+                            const isSelected = userAnswers[currentQuestionIndex] === idx;
+                            return `
+                                <label class="exam-option-label cursor-pointer flex items-center ${isSelected ? 'selected-answer' : ''}">
+                                    <input type="radio" name="answer" value="${idx}" class="hidden" ${isSelected ? 'checked' : ''} onchange="selectAnswer(${idx})">
+                                    <span class="w-7 h-7 rounded-full border border-slate-500 flex items-center justify-center font-bold text-xs mr-3 ${isSelected ? 'bg-cyan-400 text-slate-900 border-cyan-400' : 'text-slate-400'}">
+                                        ${String.fromCharCode(65 + idx)}
+                                    </span>
+                                    <span class="text-sm font-medium flex-1">${option}</span>
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+
+            const prevBtn = document.getElementById('btn-prev-question');
+            const nextBtn = document.getElementById('btn-next-question');
+
+            if (currentQuestionIndex === 0) prevBtn.classList.add('hidden'); else prevBtn.classList.remove('hidden');
+            if (currentQuestionIndex === totalQuestions - 1) nextBtn.classList.add('hidden'); else nextBtn.classList.remove('hidden');
+        }
+
+        function selectAnswer(idx) {
+            userAnswers[currentQuestionIndex] = idx;
+            renderExamQuestion();
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) { currentQuestionIndex--; renderExamQuestion(); }
+        }
+
+        function nextQuestion() {
+            if (currentExam && currentQuestionIndex < currentExam.questions.length - 1) { currentQuestionIndex++; renderExamQuestion(); }
+        }
+
+        function startExamTimer() {
+            if (examInterval) clearInterval(examInterval);
+            const timerEl = document.getElementById('exam-timer');
+            const updateDisplay = () => {
+                const minutes = Math.floor(examTimeRemaining / 60);
+                const seconds = examTimeRemaining % 60;
+                timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            };
+            updateDisplay();
+            examInterval = setInterval(() => {
+                examTimeRemaining--;
+                updateDisplay();
+                if (examTimeRemaining <= 0) { clearInterval(examInterval); submitExam(); }
+            }, 1000);
+        }
+
+        async function submitExam() {
+            clearInterval(examInterval);
+            if (!currentExam || !currentExam.questions || currentExam.questions.length === 0) {
+                closeModal('exam-player');
+                return;
+            }
+
+            let correct = 0;
+            currentExam.questions.forEach((q, idx) => {
+                if (validateAnswer(q, userAnswers[idx])) { correct++; }
+            });
+
+            const percentage = (correct / currentExam.questions.length) * 100;
+            const timeTaken = (currentExam.duration * 60) - Math.max(0, examTimeRemaining);
+
+            const result = {
+                id: 'res-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+                examId: currentExam.id,
+                examTitle: currentExam.title,
+                score: percentage,
+                correct,
+                total: currentExam.questions.length,
+                timeTaken,
+                date: new Date().toISOString(),
+                userId: currentUser.id,
+                username: currentUser.username,
+                questions: currentExam.questions,
+                userAnswers: { ...userAnswers }
+            };
+
+            resultsData.push(result);
+            localStorage.setItem('resultsData', JSON.stringify(resultsData));
+            showExamResults(result);
+            renderResults();
+        }
+
+        function showExamResults(result) {
+            document.getElementById('final-score').textContent = Math.round(result.score) + '%';
+            document.getElementById('score-status').textContent = result.score >= 70 ? 'Luar Biasa!' : 'Perlu Ditingkatkan';
+            document.getElementById('correct-count').textContent = result.correct;
+            document.getElementById('wrong-count').textContent = result.total - result.correct;
+            document.getElementById('time-taken').textContent = Math.floor(result.timeTaken / 60) + 'm ' + (result.timeTaken % 60) + 's';
+
+            const reviewContainer = document.getElementById('answers-review-container');
+            if (result.questions && result.questions.length > 0) {
+                reviewContainer.innerHTML = result.questions.map((q, idx) => {
+                    const userAns = result.userAnswers ? result.userAnswers[idx] : undefined;
+                    const isAnswered = userAns !== undefined && userAns !== null;
+                    const isCorrect = isAnswered && validateAnswer(q, userAns);
+                    
+                    let cardBorderClass = 'border-amber-500/50'; 
+                    let statusBadge = `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] px-2.5 py-1 rounded-full font-semibold"><i class="fas fa-minus-circle mr-1"></i>Belum Dijawab</span>`;
+
+                    if (isAnswered) {
+                        if (isCorrect) {
+                            cardBorderClass = 'border-green-500';
+                            statusBadge = `<span class="bg-green-500/20 text-green-400 border border-green-500/30 text-[11px] px-2.5 py-1 rounded-full font-semibold"><i class="fas fa-check-circle mr-1"></i>Benar</span>`;
+                        } else {
+                            cardBorderClass = 'border-red-500';
+                            statusBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-[11px] px-2.5 py-1 rounded-full font-semibold"><i class="fas fa-times-circle mr-1"></i>Salah</span>`;
+                        }
+                    }
+
+                    return `
+                        <div class="glass-effect p-4 rounded-xl border-l-4 ${cardBorderClass}">
+                            <div class="flex justify-between items-start gap-2 mb-3">
+                                <p class="font-bold text-sm leading-relaxed">${idx + 1}. ${q.text}</p>
+                                ${statusBadge}
+                            </div>
+                            <div class="space-y-1.5 text-xs">
+                                ${q.options.map((opt, oIdx) => {
+                                    let optionContainerClass = 'bg-slate-800/40 border border-slate-700/50 text-slate-400';
+                                    let badgeTextClass = 'text-slate-400';
+                                    let icon = '';
+
+                                    const isThisCorrectOpt = validateAnswer(q, oIdx);
+                                    const isThisUserAns = oIdx === userAns;
+
+                                    if (isThisCorrectOpt) {
+                                        optionContainerClass = 'bg-green-500/10 border border-green-500/30 text-green-300 font-semibold';
+                                        badgeTextClass = 'text-green-400 font-bold';
+                                        icon = '<span class="text-green-400 flex items-center gap-1 font-bold"><i class="fas fa-check"></i> Kunci Jawaban</span>';
+                                    }
+
+                                    if (isThisUserAns && !isCorrect) {
+                                        optionContainerClass = 'bg-red-500/10 border border-red-500/30 text-red-300';
+                                        badgeTextClass = 'text-red-400 font-bold line-through';
+                                        icon = '<span class="text-red-400 flex items-center gap-1 font-bold"><i class="fas fa-times"></i> Jawaban Anda (Salah)</span>';
+                                    } else if (isThisUserAns && isCorrect) {
+                                        icon = '<span class="text-green-400 flex items-center gap-1 font-bold"><i class="fas fa-user-check"></i> Jawaban Anda (Benar)</span>';
+                                    }
+
+                                    return `
+                                        <div class="p-2.5 rounded-lg flex justify-between items-center ${optionContainerClass}">
+                                            <span class="${badgeTextClass}">${String.fromCharCode(65 + oIdx)}. ${opt}</span>
+                                            <span class="text-[11px] ml-2">${icon}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                reviewContainer.innerHTML = '<div class="empty-state"><p>Tidak ada detail soal tersedia</p></div>';
+            }
+
+            closeModal('exam-player');
+            openModal('exam-results');
+        }
+
+        async function loadResults() { renderResults(); }
+
+        function renderResults() {
+            let totalExams = resultsData.length;
+            let avgScore = 0, bestScore = 0, totalTime = 0;
+
+            if (resultsData.length > 0) {
+                const scores = resultsData.map(r => r.score);
+                avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+                bestScore = Math.max(...scores);
+                totalTime = Math.floor(resultsData.reduce((a, b) => a + (b.timeTaken || 0), 0) / 3600);
+            }
+
+            document.getElementById('total-exams').textContent = totalExams;
+            document.getElementById('avg-score').textContent = avgScore + '%';
+            document.getElementById('best-score').textContent = bestScore + '%';
+            document.getElementById('total-time').textContent = totalTime + 'h';
+
+            const list = document.getElementById('results-list');
+            if (resultsData.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>Belum ada riwayat ujian</p></div>';
+                return;
+            }
+
+            list.innerHTML = resultsData.sort((a, b) => new Date(b.date) - new Date(a.date)).map(result => `
+                <div class="glass-effect p-4 rounded-xl flex justify-between items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="font-bold text-base">${result.examTitle}</p>
+                            <span class="bg-cyan-500/10 text-cyan-400 text-[11px] px-2 py-0.5 rounded-md border border-cyan-500/20 font-medium">
+                                <i class="fas fa-user text-[10px] mr-1"></i>${result.username || 'Pengguna'}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400">${new Date(result.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold gradient-text">${Math.round(result.score)}%</p>
+                        <p class="text-xs text-slate-400">${result.correct}/${result.total} soal</p>
+                    </div>
+                    ${currentUser?.isAdmin ? `
+                        <button onclick="deleteResult('${result.id}')" class="text-red-400 hover:text-red-300 p-2" title="Hapus Riwayat Ujian">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function deleteResult(resultId) {
+            if (!currentUser?.isAdmin) return showNotification('Hanya admin yang dapat menghapus statistik');
+            if (!confirm('Hapus entri riwayat/statistik ujian ini?')) return;
+            resultsData = resultsData.filter(r => r.id !== resultId);
+            localStorage.setItem('resultsData', JSON.stringify(resultsData));
+            renderResults();
+            showNotification('Riwayat ujian berhasil dihapus');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i>${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => { notification.remove(); }, 3000);
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

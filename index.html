@@ -507,6 +507,46 @@
             font-size: 1.1rem;
             line-height: 1.9;
         }
+        
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.1) 25%, rgba(148, 163, 184, 0.2) 50%, rgba(148, 163, 184, 0.1) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skeleton-card {
+            padding: 24px;
+            border-radius: 16px;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .skeleton-card .skeleton-line {
+            height: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+        .skeleton-card .skeleton-line.short {
+            width: 40%;
+        }
+        .skeleton-card .skeleton-line.medium {
+            width: 70%;
+        }
+        .skeleton-card .skeleton-line.long {
+            width: 90%;
+        }
+        .skeleton-card .skeleton-line:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Hide toast notification by default - hanya untuk notifikasi internal */
+        #toast {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="dark-mode">
@@ -676,10 +716,7 @@
             </div>
 
             <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="col-span-full empty-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Memuat artikel...</p>
-                </div>
+                <!-- Skeleton loading akan ditampilkan di sini -->
             </div>
         </section>
 
@@ -697,10 +734,7 @@
             </div>
 
             <div id="exams-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="col-span-full empty-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Memuat ujian...</p>
-                </div>
+                <!-- Skeleton loading akan ditampilkan di sini -->
             </div>
         </section>
 
@@ -732,7 +766,12 @@
             </div>
 
             <div class="glass-effect p-6 rounded-2xl">
-                <h3 class="text-xl font-bold mb-4">Riwayat Ujian</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Riwayat Ujian</h3>
+                    <button onclick="hapusSemuaRiwayat()" id="btn-hapus-semua" class="btn-secondary text-xs py-2 px-4 text-red-400 border-red-400/30 hidden">
+                        <i class="fas fa-trash mr-1"></i>Hapus Semua
+                    </button>
+                </div>
                 <div id="results-list" class="space-y-3">
                     <div class="empty-state">
                         <p>Belum ada riwayat ujian</p>
@@ -777,12 +816,13 @@
 
             <div id="login-pesan" class="hidden text-xs font-medium bg-amber-500/10 border border-amber-500/30 text-amber-400 px-4 py-3 rounded-xl mb-4"></div>
 
+            <!-- FORM LOGIN - dengan Lupa Password -->
             <form id="login-form" onsubmit="handleLogin(event)">
                 <div class="mb-4">
                     <label class="block text-sm font-semibold mb-2">Username</label>
                     <input type="text" id="login-username" class="input-field w-full" placeholder="Masukkan username" required>
                 </div>
-                <div class="mb-6">
+                <div class="mb-4">
                     <label class="block text-sm font-semibold mb-2">Password</label>
                     <div class="input-group-wrapper">
                         <input type="password" id="login-password" class="input-field w-full" placeholder="Masukkan password" required>
@@ -791,11 +831,20 @@
                         </button>
                     </div>
                 </div>
+                
+                <!-- Lupa Password - HANYA di tab Login -->
+                <div class="text-right mb-4">
+                    <button type="button" onclick="closeModal('auth'); openModal('forgot-password')" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold">
+                        Lupa password?
+                    </button>
+                </div>
+                
                 <button type="submit" class="btn-primary w-full">
                     <i class="fas fa-sign-in-alt mr-2"></i>Masuk
                 </button>
             </form>
 
+            <!-- FORM REGISTER - TANPA Lupa Password -->
             <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
                 <div id="register-pesan" class="hidden text-xs font-medium bg-rose-500/10 border border-rose-500/30 text-rose-400 px-4 py-3 rounded-xl mb-4"></div>
                 <div class="mb-4">
@@ -819,10 +868,6 @@
                     <i class="fas fa-user-plus mr-2"></i>Daftar Akun Baru
                 </button>
             </form>
-
-            <p class="text-center text-xs text-slate-400 mt-4">
-                Lupa password? <button onclick="closeModal('auth'); openModal('forgot-password')" class="text-cyan-400 hover:text-cyan-300 font-semibold">Klik di sini</button>
-            </p>
         </div>
     </div>
 
@@ -874,7 +919,7 @@
             </div>
 
             <p class="text-center text-xs text-slate-400 mt-4">
-                Ingat akun? <button onclick="closeModal('forgot-password'); openModal('auth'); switchAuthTab('login');" class="text-cyan-400 hover:text-cyan-300 font-semibold">Masuk di sini</button>
+                Kembali ke <button onclick="closeModal('forgot-password'); openModal('auth'); switchAuthTab('login');" class="text-cyan-400 hover:text-cyan-300 font-semibold">Masuk Akun</button>
             </p>
         </div>
     </div>
@@ -1066,7 +1111,7 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
+    <!-- TOAST NOTIFICATION - DISEMBUNYIKAN -->
     <div id="toast" class="fixed bottom-24 right-6 z-[90] glass-effect border border-slate-700/60 rounded-xl px-5 py-3 shadow-2xl text-sm text-white font-medium opacity-0 translate-y-4 pointer-events-none transition-all duration-300">
         <span id="toast-message">Pesan</span>
     </div>
@@ -1088,6 +1133,8 @@
         let pendingArticleId = null;
         let editingArticleId = null;
         let editingExamId = null;
+        let isLoadingArticles = false;
+        let isLoadingExams = false;
 
         let currentExam = null;
         let currentQuestionIndex = 0;
@@ -1184,6 +1231,7 @@
             const drawerGuestMenu = document.getElementById('drawer-guest-menu');
             const drawerUserMenu = document.getElementById('drawer-user-menu');
             const drawerUsername = document.getElementById('drawer-username-text');
+            const btnHapusSemua = document.getElementById('btn-hapus-semua');
 
             if (currentUser) {
                 roleBadge.textContent = currentUser.username;
@@ -1191,10 +1239,12 @@
                     roleBadge.className = "text-xs font-bold text-cyan-400";
                     if (createArticleBtn) createArticleBtn.classList.remove('hidden');
                     if (createExamBtn) createExamBtn.classList.remove('hidden');
+                    if (btnHapusSemua) btnHapusSemua.classList.remove('hidden');
                 } else {
                     roleBadge.className = "text-xs font-bold text-amber-400";
                     if (createArticleBtn) createArticleBtn.classList.add('hidden');
                     if (createExamBtn) createExamBtn.classList.add('hidden');
+                    if (btnHapusSemua) btnHapusSemua.classList.add('hidden');
                 }
                 if (drawerGuestMenu) drawerGuestMenu.classList.add('hidden');
                 if (drawerUserMenu) drawerUserMenu.classList.remove('hidden');
@@ -1204,6 +1254,7 @@
                 roleBadge.className = "text-xs font-bold text-slate-400";
                 if (createArticleBtn) createArticleBtn.classList.add('hidden');
                 if (createExamBtn) createExamBtn.classList.add('hidden');
+                if (btnHapusSemua) btnHapusSemua.classList.add('hidden');
                 if (drawerGuestMenu) drawerGuestMenu.classList.remove('hidden');
                 if (drawerUserMenu) drawerUserMenu.classList.add('hidden');
             }
@@ -1255,25 +1306,14 @@
             const isOpen = detailModal && detailModal.classList.contains('active');
             const isActive = document.body.classList.contains('reading-mode');
             if (!isActive && !isOpen) {
-                toast("Buka detail artikel terlebih dahulu untuk menggunakan Mode Baca.");
                 return;
             }
             document.body.classList.toggle('reading-mode');
         }
 
-        // ========== TOAST ==========
+        // ========== TOAST - DISEMBUNYIKAN ==========
         function toast(message, duration = 3000) {
-            const el = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-message');
-            if (!el || !msgEl) return;
-            msgEl.textContent = message;
-            el.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-            el.classList.add('opacity-100', 'translate-y-0');
-            clearTimeout(window._toastTimer);
-            window._toastTimer = setTimeout(() => {
-                el.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-                el.classList.remove('opacity-100', 'translate-y-0');
-            }, duration);
+            return;
         }
 
         // ========== DRAWER ==========
@@ -1394,7 +1434,6 @@
             saveSession(currentUser);
             updateAuthUI();
             closeModal('auth');
-            toast("Selamat datang, " + user.username + "! 🎉");
 
             if (pendingExamId) {
                 const examId = pendingExamId;
@@ -1462,7 +1501,6 @@
             saveSession(currentUser);
             updateAuthUI();
             closeModal('auth');
-            toast("Akun berhasil dibuat! Selamat datang, " + username + "! 🎉");
 
             if (pendingExamId) {
                 const examId = pendingExamId;
@@ -1483,7 +1521,6 @@
             currentUser = null;
             saveSession(null);
             updateAuthUI();
-            toast("Anda telah keluar. 👋");
         }
 
         function togglePassword(inputId, btn) {
@@ -1563,8 +1600,31 @@
             }, 1500);
         }
 
+        // ========== SKELETON LOADING ==========
+        function showSkeleton(containerId, count = 6) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `
+                    <div class="skeleton-card">
+                        <div class="skeleton skeleton-line short"></div>
+                        <div class="skeleton skeleton-line long" style="height:18px; margin-bottom:12px;"></div>
+                        <div class="skeleton skeleton-line medium"></div>
+                        <div class="skeleton skeleton-line long"></div>
+                        <div class="skeleton skeleton-line short" style="margin-top:12px;"></div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
         // ========== ARTICLES ==========
         async function fetchArticles() {
+            if (isLoadingArticles) return;
+            isLoadingArticles = true;
+            showSkeleton('articles-grid');
+            
             try {
                 const res = await fetch(`${BASE_API_URL}/articles`, {
                     headers: { Authorization: `Bearer ${JWT_TOKEN}` }
@@ -1576,7 +1636,9 @@
             } catch (error) {
                 console.error('Error loading articles:', error);
             }
+            isLoadingArticles = false;
             renderArticles();
+            updateHomeStats();
         }
 
         function renderArticles() {
@@ -1628,7 +1690,6 @@
         function viewArticle(id) {
             const article = articlesData.find(a => a.id === id);
             if (!article) {
-                toast("Artikel tidak ditemukan");
                 return;
             }
 
@@ -1647,7 +1708,7 @@
         }
 
         function openCreateArticleModal() {
-            if (!isAdmin()) return toast('Hanya admin yang dapat membuat artikel');
+            if (!isAdmin()) return;
             editingArticleId = null;
             document.getElementById('modal-article-title').textContent = "Buat Artikel Baru";
             document.getElementById('edit-article-id').value = "";
@@ -1657,9 +1718,9 @@
         }
 
         function openEditArticleModal(id) {
-            if (!isAdmin()) return toast('Hanya admin yang dapat mengedit artikel');
+            if (!isAdmin()) return;
             const article = articlesData.find(a => a.id === id);
-            if (!article) return toast('Artikel tidak ditemukan');
+            if (!article) return;
 
             editingArticleId = id;
             document.getElementById('modal-article-title').textContent = "Edit Artikel";
@@ -1671,7 +1732,7 @@
 
         async function handleSaveArticle(e) {
             e.preventDefault();
-            if (!isAdmin()) return toast('Hanya admin yang dapat menyimpan artikel');
+            if (!isAdmin()) return;
 
             const articleId = document.getElementById('edit-article-id').value;
             const articleData = {
@@ -1680,7 +1741,7 @@
             };
 
             if (!articleData.title || !articleData.content) {
-                return toast('Judul dan isi wajib diisi');
+                return;
             }
 
             try {
@@ -1705,17 +1766,14 @@
                 if (data.success) {
                     await fetchArticles();
                     closeModal('create-article');
-                    toast(articleId ? 'Artikel berhasil diperbarui' : 'Artikel berhasil dibuat');
-                } else {
-                    toast('Gagal menyimpan artikel: ' + (data.error || 'Unknown error'));
                 }
             } catch (error) {
-                toast('Gagal menyimpan artikel');
+                console.error('Error saving article:', error);
             }
         }
 
         async function deleteArticle(id) {
-            if (!isAdmin()) return toast('Hanya admin yang dapat menghapus artikel');
+            if (!isAdmin()) return;
             if (!confirm('Hapus artikel ini?')) return;
 
             try {
@@ -1726,12 +1784,9 @@
                 const data = await res.json();
                 if (data.success) {
                     await fetchArticles();
-                    toast('Artikel berhasil dihapus');
-                } else {
-                    toast('Gagal menghapus artikel');
                 }
             } catch (error) {
-                toast('Gagal menghapus artikel');
+                console.error('Error deleting article:', error);
             }
         }
 
@@ -1801,12 +1856,12 @@
 
             const commentsSection = document.getElementById('article-detail-comments');
             const articleId = commentsSection?.dataset.articleId;
-            if (!articleId) return toast('Artikel tidak ditemukan');
+            if (!articleId) return;
 
             const input = document.getElementById('article-comment-input');
             if (!input) return;
             const text = input.value.trim();
-            if (!text) return toast('Tulis komentar terlebih dahulu');
+            if (!text) return;
 
             const comments = getArticleComments(articleId);
             comments.unshift({
@@ -1818,7 +1873,6 @@
             saveArticleComments(articleId, comments);
             input.value = '';
             renderArticleComments(articleId);
-            toast('Komentar berhasil disimpan');
         }
 
         function deleteArticleComment(articleId, commentId) {
@@ -1827,11 +1881,14 @@
             const comments = getArticleComments(articleId).filter(c => c.id !== commentId);
             saveArticleComments(articleId, comments);
             renderArticleComments(articleId);
-            toast('Komentar dihapus');
         }
 
         // ========== EXAMS ==========
         async function fetchExams() {
+            if (isLoadingExams) return;
+            isLoadingExams = true;
+            showSkeleton('exams-grid');
+            
             try {
                 const res = await fetch(`${BASE_API_URL}/exams`, {
                     headers: { Authorization: `Bearer ${JWT_TOKEN}` }
@@ -1843,7 +1900,9 @@
             } catch (error) {
                 console.error('Error loading exams:', error);
             }
+            isLoadingExams = false;
             renderExams();
+            updateHomeStats();
         }
 
         function renderExams() {
@@ -1946,7 +2005,6 @@
         function removeQuestionItem(btn) {
             const container = document.getElementById('questions-list-container');
             if (container.children.length <= 1) {
-                toast('Ujian minimal harus memiliki 1 soal!');
                 return;
             }
             btn.closest('.question-item-card').remove();
@@ -1963,7 +2021,7 @@
         }
 
         function openCreateExamModal() {
-            if (!isAdmin()) return toast('Hanya admin yang dapat membuat ujian');
+            if (!isAdmin()) return;
             editingExamId = null;
             document.getElementById('modal-exam-title').textContent = "Buat Ujian Baru (Pilihan Ganda)";
             document.getElementById('edit-exam-id').value = "";
@@ -1978,9 +2036,9 @@
         }
 
         function openEditExamModal(id) {
-            if (!isAdmin()) return toast('Hanya admin yang dapat mengedit ujian');
+            if (!isAdmin()) return;
             const exam = examsData.find(e => e.id === id);
-            if (!exam) return toast('Ujian tidak ditemukan');
+            if (!exam) return;
 
             editingExamId = id;
             document.getElementById('modal-exam-title').textContent = "Edit Ujian";
@@ -2003,7 +2061,7 @@
 
         async function handleSaveExam(e) {
             e.preventDefault();
-            if (!isAdmin()) return toast('Hanya admin yang dapat menyimpan ujian');
+            if (!isAdmin()) return;
 
             const examId = document.getElementById('edit-exam-id').value;
 
@@ -2033,7 +2091,7 @@
             };
 
             if (!examData.title || questions.length === 0) {
-                return toast('Judul dan minimal 1 soal wajib diisi');
+                return;
             }
 
             try {
@@ -2058,17 +2116,14 @@
                 if (data.success) {
                     await fetchExams();
                     closeModal('create-exam');
-                    toast(examId ? 'Ujian berhasil diperbarui' : 'Ujian berhasil dibuat');
-                } else {
-                    toast('Gagal menyimpan ujian: ' + (data.error || 'Unknown error'));
                 }
             } catch (error) {
-                toast('Gagal menyimpan ujian');
+                console.error('Error saving exam:', error);
             }
         }
 
         async function deleteExam(id) {
-            if (!isAdmin()) return toast('Hanya admin yang dapat menghapus ujian');
+            if (!isAdmin()) return;
             if (!confirm('Hapus ujian ini?')) return;
 
             try {
@@ -2081,12 +2136,9 @@
                     resultsData = resultsData.filter(r => r.examId !== id);
                     saveResults();
                     await fetchExams();
-                    toast('Ujian berhasil dihapus');
-                } else {
-                    toast('Gagal menghapus ujian');
                 }
             } catch (error) {
-                toast('Gagal menghapus ujian');
+                console.error('Error deleting exam:', error);
             }
         }
 
@@ -2105,7 +2157,6 @@
         function startExam(examId) {
             const exam = examsData.find(e => e.id === examId);
             if (!exam || !exam.questions || exam.questions.length === 0) {
-                toast("Ujian ini tidak memiliki soal.");
                 return;
             }
 
@@ -2368,28 +2419,26 @@
             let bestScore = 0;
             let totalTime = 0;
 
-            if (resultsData.length > 0) {
-                const userResults = isAdmin() ? resultsData : resultsData.filter(r => r.userId === currentUser?.userId);
+            // Filter hasil berdasarkan user (non-admin hanya lihat milik sendiri)
+            const userResults = isAdmin() ? resultsData : resultsData.filter(r => r.userId === currentUser?.userId);
+
+            if (userResults.length > 0) {
                 const scores = userResults.map(r => r.score);
-                if (scores.length > 0) {
-                    avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-                    bestScore = Math.max(...scores);
-                    totalTime = Math.floor(userResults.reduce((a, b) => a + (b.timeTaken || 0), 0) / 3600);
-                }
+                avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+                bestScore = Math.max(...scores);
+                totalTime = Math.floor(userResults.reduce((a, b) => a + (b.timeTaken || 0), 0) / 3600);
             }
 
-            document.getElementById('total-exams').textContent = totalExams;
+            document.getElementById('total-exams').textContent = userResults.length;
             document.getElementById('avg-score').textContent = avgScore + '%';
             document.getElementById('best-score').textContent = bestScore + '%';
             document.getElementById('total-time').textContent = totalTime + 'h';
 
             const list = document.getElementById('results-list');
-            if (resultsData.length === 0) {
+            if (userResults.length === 0) {
                 list.innerHTML = '<div class="empty-state"><p>Belum ada riwayat ujian</p></div>';
                 return;
             }
-
-            const userResults = isAdmin() ? resultsData : resultsData.filter(r => r.userId === currentUser?.userId);
 
             list.innerHTML = userResults.sort((a, b) => new Date(b.date) - new Date(a.date)).map(result => `
                 <div class="glass-effect p-4 rounded-xl flex justify-between items-center gap-4">
@@ -2416,13 +2465,23 @@
         }
 
         function deleteResult(resultId) {
-            if (!isAdmin()) return toast('Hanya admin yang dapat menghapus statistik');
+            if (!isAdmin()) return;
             if (!confirm('Hapus entri riwayat ujian ini?')) return;
 
             resultsData = resultsData.filter(r => r.id !== resultId);
-            saveResults();
+            localStorage.setItem(STORAGE_RESULTS, JSON.stringify(resultsData));
             renderResults();
-            toast('Riwayat ujian berhasil dihapus');
+            updateHomeStats();
+        }
+
+        function hapusSemuaRiwayat() {
+            if (!isAdmin()) return;
+            if (!confirm('Yakin ingin menghapus SEMUA riwayat ujian? Tindakan ini tidak bisa dibatalkan!')) return;
+            
+            resultsData = [];
+            localStorage.setItem(STORAGE_RESULTS, JSON.stringify(resultsData));
+            renderResults();
+            updateHomeStats();
         }
 
         // ========== HOME STATS ==========
@@ -2432,28 +2491,39 @@
             const userCount = document.getElementById('home-user-count');
             const bestScore = document.getElementById('home-best-score');
 
-            if (articleCount) articleCount.textContent = articlesData.length;
-            if (examCount) examCount.textContent = examsData.length;
+            if (articleCount) articleCount.textContent = articlesData.length || 0;
+            if (examCount) examCount.textContent = examsData.length || 0;
             if (userCount) {
                 const users = getUsers();
                 userCount.textContent = users.length || 1;
             }
             if (bestScore) {
-                const scores = resultsData.map(r => r.score);
+                const userResults = isAdmin() ? resultsData : resultsData.filter(r => r.userId === currentUser?.userId);
+                const scores = userResults.map(r => r.score);
                 bestScore.textContent = scores.length > 0 ? Math.round(Math.max(...scores)) + '%' : '0%';
             }
         }
 
         // ========== INIT ==========
         function init() {
+            // Load results from localStorage first
+            resultsData = getStoredResults();
+            
             initUsers();
             loadSession();
             applySavedTheme();
+            
+            // Update UI with current data
             updateAuthUI();
+            
+            // Update home stats immediately from localStorage
+            updateHomeStats();
+            
+            // Load data from API
             fetchArticles();
             fetchExams();
-            renderResults();
-            updateHomeStats();
+            
+            // Show home section
             switchSection('home');
         }
 

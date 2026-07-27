@@ -107,6 +107,10 @@
             background: rgba(30, 41, 59, 0.8);
             box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
         }
+        .input-field option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
 
         .progress-bar {
             background: rgba(148, 163, 184, 0.1);
@@ -468,6 +472,10 @@
             color: #06b6d4;
             background: rgba(6, 182, 212, 0.1);
         }
+        body.light-mode .input-field option {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
 
         body.reading-mode {
             overflow: hidden;
@@ -672,13 +680,8 @@
             </div>
 
             <div class="flex gap-4 mb-6 flex-wrap">
-                <input type="text" id="search-articles" placeholder="🔍 Cari artikel..." class="input-field flex-1 min-w-[200px]" oninput="filterArticles()">
-                <select id="category-filter" class="input-field" onchange="filterArticles()">
-                    <option value="">Semua Kategori</option>
-                    <option value="programming">Pemrograman</option>
-                    <option value="math">Matematika</option>
-                    <option value="science">Sains</option>
-                </select>
+                <input type="text" id="search-articles" placeholder="🔍 Cari artikel berdasarkan judul atau konten..." class="input-field flex-1 min-w-[200px]" oninput="filterArticles()">
+                <span id="article-result-count" class="text-sm text-slate-400 self-center"></span>
             </div>
 
             <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -699,13 +702,8 @@
             </div>
 
             <div class="flex gap-4 mb-6 flex-wrap">
-                <input type="text" id="search-exams" placeholder="🔍 Cari ujian..." class="input-field flex-1 min-w-[200px]" oninput="filterExams()">
-                <select id="level-filter" class="input-field" onchange="filterExams()">
-                    <option value="">Semua Level</option>
-                    <option value="easy">Mudah</option>
-                    <option value="medium">Sedang</option>
-                    <option value="hard">Sulit</option>
-                </select>
+                <input type="text" id="search-exams" placeholder="🔍 Cari ujian berdasarkan judul..." class="input-field flex-1 min-w-[200px]" oninput="filterExams()">
+                <span id="exam-result-count" class="text-sm text-slate-400 self-center"></span>
             </div>
 
             <div id="exams-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -903,15 +901,6 @@
                     <input type="text" id="article-title" class="input-field w-full" placeholder="Judul artikel" required>
                 </div>
 
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-2">Kategori</label>
-                    <select id="article-category" class="input-field w-full" required>
-                        <option value="programming">Pemrograman</option>
-                        <option value="math">Matematika</option>
-                        <option value="science">Sains</option>
-                    </select>
-                </div>
-
                 <div class="mb-6">
                     <label class="block text-sm font-semibold mb-2">Isi Artikel</label>
                     <textarea id="article-content" class="input-field w-full" rows="8" placeholder="Tulis isi artikel..." required></textarea>
@@ -943,14 +932,6 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm font-semibold mb-2">Level Kesulitan</label>
-                        <select id="exam-level" class="input-field w-full" required>
-                            <option value="easy">Mudah</option>
-                            <option value="medium">Sedang</option>
-                            <option value="hard">Sulit</option>
-                        </select>
-                    </div>
                     <div>
                         <label class="block text-sm font-semibold mb-2">Durasi (menit)</label>
                         <input type="number" id="exam-duration" class="input-field w-full" value="30" min="1" required>
@@ -1603,6 +1584,7 @@
                 const data = await res.json();
                 if (data.success) {
                     articlesData = data.data || [];
+                    console.log('📚 Artikel dimuat:', articlesData.length, 'item');
                 }
             } catch (error) {
                 console.error('Error loading articles:', error);
@@ -1612,22 +1594,42 @@
 
         function renderArticles() {
             const grid = document.getElementById('articles-grid');
-            const count = document.getElementById('article-count');
+            const resultCount = document.getElementById('article-result-count');
             if (!grid) return;
 
-            const searchTerm = document.getElementById('search-articles')?.value?.toLowerCase() || '';
-            const category = document.getElementById('category-filter')?.value || '';
+            const searchTerm = document.getElementById('search-articles')?.value?.toLowerCase()?.trim() || '';
 
-            let filtered = articlesData.filter(a => {
-                const matchesSearch = a.title?.toLowerCase().includes(searchTerm) || a.content?.toLowerCase().includes(searchTerm);
-                const matchesCategory = !category || a.category === category;
-                return matchesSearch && matchesCategory;
+            const articles = Array.isArray(articlesData) ? articlesData : [];
+
+            let filtered = articles.filter(a => {
+                if (!a) return false;
+                const title = (a.title || '').toLowerCase();
+                const content = (a.content || '').toLowerCase();
+                return title.includes(searchTerm) || content.includes(searchTerm);
             });
 
-            if (count) count.textContent = filtered.length;
+            filtered.sort((a, b) => {
+                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                return dateB - dateA;
+            });
+
+            if (resultCount) {
+                const total = articles.length;
+                const shown = filtered.length;
+                if (searchTerm) {
+                    resultCount.textContent = `Menampilkan ${shown} dari ${total} artikel`;
+                } else {
+                    resultCount.textContent = `${total} artikel`;
+                }
+            }
 
             if (filtered.length === 0) {
-                grid.innerHTML = '<div class="col-span-full empty-state"><i class="fas fa-search"></i><p>Tidak ada artikel ditemukan</p></div>';
+                grid.innerHTML = `<div class="col-span-full empty-state">
+                    <i class="fas fa-search"></i>
+                    <p>${searchTerm ? 'Tidak ada artikel yang cocok dengan pencarian' : 'Belum ada artikel tersedia'}</p>
+                    ${searchTerm ? '<p class="text-xs text-slate-500 mt-1">Coba gunakan kata kunci lain</p>' : ''}
+                </div>`;
                 return;
             }
 
@@ -1635,20 +1637,20 @@
             grid.innerHTML = filtered.map(article => `
                 <div class="glass-effect p-6 rounded-2xl card-hover cursor-pointer relative" onclick="viewArticle('${article.id}')">
                     <div class="flex items-start justify-between mb-3">
-                        <span class="badge badge-success">${article.category || 'Umum'}</span>
+                        <span class="badge badge-info">📄 Artikel</span>
                         ${showAdmin ? `
-                            <div class="flex items-center gap-2">
-                                <button onclick="openEditArticleModal('${article.id}'); event.stopPropagation();" class="text-cyan-400 hover:text-cyan-300 p-1" title="Edit Artikel">
+                            <div class="flex items-center gap-2" onclick="event.stopPropagation();">
+                                <button onclick="openEditArticleModal('${article.id}')" class="text-cyan-400 hover:text-cyan-300 p-1" title="Edit Artikel">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button onclick="deleteArticle('${article.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300 p-1" title="Hapus Artikel">
+                                <button onclick="deleteArticle('${article.id}')" class="text-red-400 hover:text-red-300 p-1" title="Hapus Artikel">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         ` : ''}
                     </div>
-                    <h3 class="text-lg font-bold mb-2 line-clamp-2">${article.title}</h3>
-                    <p class="text-slate-400 text-sm line-clamp-3 mb-4">${article.content}</p>
+                    <h3 class="text-lg font-bold mb-2 line-clamp-2">${article.title || 'Tanpa Judul'}</h3>
+                    <p class="text-slate-400 text-sm line-clamp-3 mb-4">${(article.content || '').substring(0, 150)}${(article.content || '').length > 150 ? '...' : ''}</p>
                     <div class="text-xs text-slate-500">${article.author || 'Admin'} • ${article.created_at ? new Date(article.created_at).toLocaleDateString('id-ID') : 'Baru'}</div>
                 </div>
             `).join('');
@@ -1665,9 +1667,9 @@
                 return;
             }
 
-            document.getElementById('article-detail-title').textContent = article.title;
-            document.getElementById('article-detail-meta').textContent = `${article.author || 'Admin'} • ${article.category || 'Umum'} • ${article.created_at ? new Date(article.created_at).toLocaleDateString('id-ID') : 'Baru'}`;
-            document.getElementById('article-detail-content').innerHTML = article.content.replace(/\n/g, '<br>');
+            document.getElementById('article-detail-title').textContent = article.title || 'Tanpa Judul';
+            document.getElementById('article-detail-meta').textContent = `${article.author || 'Admin'} • ${article.created_at ? new Date(article.created_at).toLocaleDateString('id-ID') : 'Baru'}`;
+            document.getElementById('article-detail-content').innerHTML = (article.content || '').replace(/\n/g, '<br>');
 
             const commentsSection = document.getElementById('article-detail-comments');
             if (commentsSection) {
@@ -1685,7 +1687,6 @@
             document.getElementById('modal-article-title').textContent = "Buat Artikel Baru";
             document.getElementById('edit-article-id').value = "";
             document.getElementById('article-title').value = "";
-            document.getElementById('article-category').value = "programming";
             document.getElementById('article-content').value = "";
             openModal('create-article');
         }
@@ -1698,9 +1699,8 @@
             editingArticleId = id;
             document.getElementById('modal-article-title').textContent = "Edit Artikel";
             document.getElementById('edit-article-id').value = article.id;
-            document.getElementById('article-title').value = article.title;
-            document.getElementById('article-category').value = article.category || 'programming';
-            document.getElementById('article-content').value = article.content;
+            document.getElementById('article-title').value = article.title || '';
+            document.getElementById('article-content').value = article.content || '';
             openModal('create-article');
         }
 
@@ -1711,7 +1711,6 @@
             const articleId = document.getElementById('edit-article-id').value;
             const articleData = {
                 title: document.getElementById('article-title').value,
-                category: document.getElementById('article-category').value,
                 content: document.getElementById('article-content').value
             };
 
@@ -1810,7 +1809,7 @@
             }
 
             const showDelete = isAdmin();
-            list.innerHTML = comments.map(comment => `
+            list.innerHTML = comments.slice(0, 20).map(comment => `
                 <div class="glass-effect p-4 rounded-xl">
                     <div class="flex justify-between items-start">
                         <div>
@@ -1875,6 +1874,7 @@
                 const data = await res.json();
                 if (data.success) {
                     examsData = data.data || [];
+                    console.log('📝 Ujian dimuat:', examsData.length, 'item');
                 }
             } catch (error) {
                 console.error('Error loading exams:', error);
@@ -1884,52 +1884,73 @@
 
         function renderExams() {
             const grid = document.getElementById('exams-grid');
-            const count = document.getElementById('exam-count');
+            const resultCount = document.getElementById('exam-result-count');
             if (!grid) return;
 
-            const searchTerm = document.getElementById('search-exams')?.value?.toLowerCase() || '';
-            const level = document.getElementById('level-filter')?.value || '';
+            const searchTerm = document.getElementById('search-exams')?.value?.toLowerCase()?.trim() || '';
 
-            let filtered = examsData.filter(e => {
-                const matchesSearch = e.title?.toLowerCase().includes(searchTerm);
-                const matchesLevel = !level || e.level === level;
-                return matchesSearch && matchesLevel;
+            const exams = Array.isArray(examsData) ? examsData : [];
+
+            let filtered = exams.filter(e => {
+                if (!e) return false;
+                const title = (e.title || '').toLowerCase();
+                return title.includes(searchTerm);
             });
 
-            if (count) count.textContent = filtered.length;
+            filtered.sort((a, b) => {
+                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                return dateB - dateA;
+            });
+
+            if (resultCount) {
+                const total = exams.length;
+                const shown = filtered.length;
+                if (searchTerm) {
+                    resultCount.textContent = `Menampilkan ${shown} dari ${total} ujian`;
+                } else {
+                    resultCount.textContent = `${total} ujian`;
+                }
+            }
 
             if (filtered.length === 0) {
-                grid.innerHTML = '<div class="col-span-full empty-state"><i class="fas fa-search"></i><p>Tidak ada ujian ditemukan</p></div>';
+                grid.innerHTML = `<div class="col-span-full empty-state">
+                    <i class="fas fa-search"></i>
+                    <p>${searchTerm ? 'Tidak ada ujian yang cocok dengan pencarian' : 'Belum ada ujian tersedia'}</p>
+                    ${searchTerm ? '<p class="text-xs text-slate-500 mt-1">Coba gunakan kata kunci lain</p>' : ''}
+                </div>`;
                 return;
             }
 
             const showAdmin = isAdmin();
-            grid.innerHTML = filtered.map(exam => `
+            grid.innerHTML = filtered.map(exam => {
+                const questionCount = (exam.questions && Array.isArray(exam.questions)) ? exam.questions.length : 0;
+                return `
                 <div class="glass-effect p-6 rounded-2xl card-hover relative">
                     <div class="flex items-start justify-between mb-3">
-                        <span class="badge ${exam.level === 'easy' ? 'badge-success' : exam.level === 'medium' ? 'badge-warning' : 'badge-danger'}">${exam.level}</span>
+                        <span class="badge badge-success">📝 Ujian</span>
                         ${showAdmin ? `
-                            <div class="flex items-center gap-2">
-                                <button onclick="openEditExamModal('${exam.id}'); event.stopPropagation();" class="text-cyan-400 hover:text-cyan-300 p-1" title="Edit Ujian">
+                            <div class="flex items-center gap-2" onclick="event.stopPropagation();">
+                                <button onclick="openEditExamModal('${exam.id}')" class="text-cyan-400 hover:text-cyan-300 p-1" title="Edit Ujian">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button onclick="deleteExam('${exam.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300 p-1" title="Hapus Ujian">
+                                <button onclick="deleteExam('${exam.id}')" class="text-red-400 hover:text-red-300 p-1" title="Hapus Ujian">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         ` : ''}
                     </div>
-                    <h3 class="text-lg font-bold mb-2">${exam.title}</h3>
-                    <p class="text-slate-400 text-sm mb-4">${exam.description || 'Tanpa deskripsi'}</p>
+                    <h3 class="text-lg font-bold mb-2 line-clamp-2">${exam.title || 'Tanpa Judul'}</h3>
+                    <p class="text-slate-400 text-sm mb-4 line-clamp-2">${exam.description || 'Tanpa deskripsi'}</p>
                     <div class="flex justify-between items-center mb-4 text-sm text-slate-400">
-                        <span><i class="fas fa-question-circle mr-1"></i>${exam.questions?.length || 0} soal</span>
-                        <span><i class="fas fa-clock mr-1"></i>${exam.duration} menit</span>
+                        <span><i class="fas fa-question-circle mr-1"></i>${questionCount} soal</span>
+                        <span><i class="fas fa-clock mr-1"></i>${exam.duration || 30} menit</span>
                     </div>
                     <button onclick="handleStartExam('${exam.id}')" class="btn-primary w-full text-sm py-2">
                         <i class="fas fa-play mr-2"></i>Mulai Ujian
                     </button>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function filterExams() {
@@ -2006,7 +2027,6 @@
             document.getElementById('modal-exam-title').textContent = "Buat Ujian Baru (Pilihan Ganda)";
             document.getElementById('edit-exam-id').value = "";
             document.getElementById('exam-title').value = "";
-            document.getElementById('exam-level').value = "easy";
             document.getElementById('exam-duration').value = 30;
             document.getElementById('exam-description').value = "";
 
@@ -2025,7 +2045,6 @@
             document.getElementById('modal-exam-title').textContent = "Edit Ujian";
             document.getElementById('edit-exam-id').value = exam.id;
             document.getElementById('exam-title').value = exam.title || "";
-            document.getElementById('exam-level').value = exam.level || "easy";
             document.getElementById('exam-duration').value = exam.duration || 30;
             document.getElementById('exam-description').value = exam.description || "";
 
@@ -2067,7 +2086,6 @@
 
             const examData = {
                 title: document.getElementById('exam-title').value,
-                level: document.getElementById('exam-level').value,
                 duration: parseInt(document.getElementById('exam-duration').value),
                 description: document.getElementById('exam-description').value,
                 questions: questions
@@ -2473,8 +2491,8 @@
             const userCount = document.getElementById('home-user-count');
             const bestScore = document.getElementById('home-best-score');
 
-            if (articleCount) articleCount.textContent = articlesData.length;
-            if (examCount) examCount.textContent = examsData.length;
+            if (articleCount) articleCount.textContent = Array.isArray(articlesData) ? articlesData.length : 0;
+            if (examCount) examCount.textContent = Array.isArray(examsData) ? examsData.length : 0;
             if (userCount) {
                 const users = getUsers();
                 userCount.textContent = users.length || 1;

@@ -673,12 +673,6 @@
 
             <div class="flex gap-4 mb-6 flex-wrap">
                 <input type="text" id="search-articles" placeholder="🔍 Cari artikel..." class="input-field flex-1 min-w-[200px]" oninput="filterArticles()">
-                <select id="category-filter" class="input-field" onchange="filterArticles()">
-                    <option value="">Semua Kategori</option>
-                    <option value="programming">Pemrograman</option>
-                    <option value="math">Matematika</option>
-                    <option value="science">Sains</option>
-                </select>
             </div>
 
             <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -700,12 +694,6 @@
 
             <div class="flex gap-4 mb-6 flex-wrap">
                 <input type="text" id="search-exams" placeholder="🔍 Cari ujian..." class="input-field flex-1 min-w-[200px]" oninput="filterExams()">
-                <select id="level-filter" class="input-field" onchange="filterExams()">
-                    <option value="">Semua Level</option>
-                    <option value="easy">Mudah</option>
-                    <option value="medium">Sedang</option>
-                    <option value="hard">Sulit</option>
-                </select>
             </div>
 
             <div id="exams-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -903,15 +891,6 @@
                     <input type="text" id="article-title" class="input-field w-full" placeholder="Judul artikel" required>
                 </div>
 
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-2">Kategori</label>
-                    <select id="article-category" class="input-field w-full" required>
-                        <option value="programming">Pemrograman</option>
-                        <option value="math">Matematika</option>
-                        <option value="science">Sains</option>
-                    </select>
-                </div>
-
                 <div class="mb-6">
                     <label class="block text-sm font-semibold mb-2">Isi Artikel</label>
                     <textarea id="article-content" class="input-field w-full" rows="8" placeholder="Tulis isi artikel..." required></textarea>
@@ -942,19 +921,9 @@
                     <input type="text" id="exam-title" class="input-field w-full" placeholder="Contoh: Ujian Matematika Dasar" required>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm font-semibold mb-2">Level Kesulitan</label>
-                        <select id="exam-level" class="input-field w-full" required>
-                            <option value="easy">Mudah</option>
-                            <option value="medium">Sedang</option>
-                            <option value="hard">Sulit</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-2">Durasi (menit)</label>
-                        <input type="number" id="exam-duration" class="input-field w-full" value="30" min="1" required>
-                    </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Durasi (menit)</label>
+                    <input type="number" id="exam-duration" class="input-field w-full" value="30" min="1" required>
                 </div>
 
                 <div class="mb-4">
@@ -1616,12 +1585,10 @@
             if (!grid) return;
 
             const searchTerm = document.getElementById('search-articles')?.value?.toLowerCase() || '';
-            const category = document.getElementById('category-filter')?.value || '';
 
             let filtered = articlesData.filter(a => {
                 const matchesSearch = a.title?.toLowerCase().includes(searchTerm) || a.content?.toLowerCase().includes(searchTerm);
-                const matchesCategory = !category || a.category === category;
-                return matchesSearch && matchesCategory;
+                return matchesSearch;
             });
 
             if (count) count.textContent = filtered.length;
@@ -1685,7 +1652,6 @@
             document.getElementById('modal-article-title').textContent = "Buat Artikel Baru";
             document.getElementById('edit-article-id').value = "";
             document.getElementById('article-title').value = "";
-            document.getElementById('article-category').value = "programming";
             document.getElementById('article-content').value = "";
             openModal('create-article');
         }
@@ -1699,7 +1665,6 @@
             document.getElementById('modal-article-title').textContent = "Edit Artikel";
             document.getElementById('edit-article-id').value = article.id;
             document.getElementById('article-title').value = article.title;
-            document.getElementById('article-category').value = article.category || 'programming';
             document.getElementById('article-content').value = article.content;
             openModal('create-article');
         }
@@ -1711,7 +1676,6 @@
             const articleId = document.getElementById('edit-article-id').value;
             const articleData = {
                 title: document.getElementById('article-title').value,
-                category: document.getElementById('article-category').value,
                 content: document.getElementById('article-content').value
             };
 
@@ -1888,12 +1852,10 @@
             if (!grid) return;
 
             const searchTerm = document.getElementById('search-exams')?.value?.toLowerCase() || '';
-            const level = document.getElementById('level-filter')?.value || '';
 
             let filtered = examsData.filter(e => {
                 const matchesSearch = e.title?.toLowerCase().includes(searchTerm);
-                const matchesLevel = !level || e.level === level;
-                return matchesSearch && matchesLevel;
+                return matchesSearch;
             });
 
             if (count) count.textContent = filtered.length;
@@ -1907,7 +1869,7 @@
             grid.innerHTML = filtered.map(exam => `
                 <div class="glass-effect p-6 rounded-2xl card-hover relative">
                     <div class="flex items-start justify-between mb-3">
-                        <span class="badge ${exam.level === 'easy' ? 'badge-success' : exam.level === 'medium' ? 'badge-warning' : 'badge-danger'}">${exam.level}</span>
+                        <span class="badge badge-success">${exam.level || 'Umum'}</span>
                         ${showAdmin ? `
                             <div class="flex items-center gap-2">
                                 <button onclick="openEditExamModal('${exam.id}'); event.stopPropagation();" class="text-cyan-400 hover:text-cyan-300 p-1" title="Edit Ujian">
@@ -2006,7 +1968,6 @@
             document.getElementById('modal-exam-title').textContent = "Buat Ujian Baru (Pilihan Ganda)";
             document.getElementById('edit-exam-id').value = "";
             document.getElementById('exam-title').value = "";
-            document.getElementById('exam-level').value = "easy";
             document.getElementById('exam-duration').value = 30;
             document.getElementById('exam-description').value = "";
 
@@ -2025,7 +1986,6 @@
             document.getElementById('modal-exam-title').textContent = "Edit Ujian";
             document.getElementById('edit-exam-id').value = exam.id;
             document.getElementById('exam-title').value = exam.title || "";
-            document.getElementById('exam-level').value = exam.level || "easy";
             document.getElementById('exam-duration').value = exam.duration || 30;
             document.getElementById('exam-description').value = exam.description || "";
 
@@ -2067,7 +2027,6 @@
 
             const examData = {
                 title: document.getElementById('exam-title').value,
-                level: document.getElementById('exam-level').value,
                 duration: parseInt(document.getElementById('exam-duration').value),
                 description: document.getElementById('exam-description').value,
                 questions: questions

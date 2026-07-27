@@ -170,36 +170,6 @@
             text-align: center;
         }
 
-        .notification {
-            position: fixed;
-            bottom: 85px;
-            right: 24px;
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            padding: 16px 24px;
-            color: #e2e8f0;
-            font-size: 14px;
-            z-index: 2000;
-            animation: slideInRight 0.4s ease;
-        }
-        @media (min-width: 768px) {
-            .notification {
-                bottom: 24px;
-            }
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
         .badge {
             display: inline-block;
             padding: 4px 12px;
@@ -543,7 +513,7 @@
             margin-bottom: 0;
         }
         
-        /* Hide toast notification by default - hanya untuk notifikasi internal */
+        /* Hide toast notification */
         #toast {
             display: none !important;
         }
@@ -715,9 +685,7 @@
                 <input type="text" id="search-articles" placeholder="🔍 Cari artikel..." class="input-field flex-1 min-w-[200px]" oninput="filterArticles()">
             </div>
 
-            <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Skeleton loading akan ditampilkan di sini -->
-            </div>
+            <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
         <!-- EXAMS SECTION -->
@@ -733,9 +701,7 @@
                 <input type="text" id="search-exams" placeholder="🔍 Cari ujian..." class="input-field flex-1 min-w-[200px]" oninput="filterExams()">
             </div>
 
-            <div id="exams-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Skeleton loading akan ditampilkan di sini -->
-            </div>
+            <div id="exams-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
         <!-- RESULTS SECTION -->
@@ -816,7 +782,6 @@
 
             <div id="login-pesan" class="hidden text-xs font-medium bg-amber-500/10 border border-amber-500/30 text-amber-400 px-4 py-3 rounded-xl mb-4"></div>
 
-            <!-- FORM LOGIN - dengan Lupa Password -->
             <form id="login-form" onsubmit="handleLogin(event)">
                 <div class="mb-4">
                     <label class="block text-sm font-semibold mb-2">Username</label>
@@ -831,20 +796,16 @@
                         </button>
                     </div>
                 </div>
-                
-                <!-- Lupa Password - HANYA di tab Login -->
                 <div class="text-right mb-4">
                     <button type="button" onclick="closeModal('auth'); openModal('forgot-password')" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold">
                         Lupa password?
                     </button>
                 </div>
-                
                 <button type="submit" class="btn-primary w-full">
                     <i class="fas fa-sign-in-alt mr-2"></i>Masuk
                 </button>
             </form>
 
-            <!-- FORM REGISTER - TANPA Lupa Password -->
             <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
                 <div id="register-pesan" class="hidden text-xs font-medium bg-rose-500/10 border border-rose-500/30 text-rose-400 px-4 py-3 rounded-xl mb-4"></div>
                 <div class="mb-4">
@@ -1090,7 +1051,6 @@
 
             <div id="article-detail-content" class="prose text-slate-300 mb-8 leading-relaxed"></div>
 
-            <!-- Comments Section -->
             <div id="article-detail-comments" data-article-id="" class="border-t border-slate-700/60 pt-6 mt-4">
                 <div class="flex items-center justify-between mb-4">
                     <h4 class="text-lg font-bold text-cyan-400"><i class="fas fa-comments mr-2"></i>Diskusi</h4>
@@ -1142,7 +1102,6 @@
         let examTimeRemaining = 0;
         let examInterval = null;
         let examStartTime = null;
-        let soalSementara = [];
 
         // ========== AUTH SYSTEM ==========
         function initUsers() {
@@ -1302,12 +1261,6 @@
 
         // ========== READING MODE ==========
         function toggleReadingMode() {
-            const detailModal = document.getElementById('article-detail-modal');
-            const isOpen = detailModal && detailModal.classList.contains('active');
-            const isActive = document.body.classList.contains('reading-mode');
-            if (!isActive && !isOpen) {
-                return;
-            }
             document.body.classList.toggle('reading-mode');
         }
 
@@ -1515,7 +1468,6 @@
 
         function logout() {
             if (currentExam) {
-                if (!confirm("Anda sedang mengerjakan ujian. Yakin ingin keluar?")) return;
                 closeModal('exam-player');
             }
             currentUser = null;
@@ -1643,7 +1595,6 @@
 
         function renderArticles() {
             const grid = document.getElementById('articles-grid');
-            const count = document.getElementById('article-count');
             if (!grid) return;
 
             const searchTerm = document.getElementById('search-articles')?.value?.toLowerCase() || '';
@@ -1652,8 +1603,6 @@
                 const matchesSearch = a.title?.toLowerCase().includes(searchTerm) || a.content?.toLowerCase().includes(searchTerm);
                 return matchesSearch;
             });
-
-            if (count) count.textContent = filtered.length;
 
             if (filtered.length === 0) {
                 grid.innerHTML = '<div class="col-span-full empty-state"><i class="fas fa-search"></i><p>Tidak ada artikel ditemukan</p></div>';
@@ -1689,9 +1638,7 @@
 
         function viewArticle(id) {
             const article = articlesData.find(a => a.id === id);
-            if (!article) {
-                return;
-            }
+            if (!article) return;
 
             document.getElementById('article-detail-title').textContent = article.title;
             document.getElementById('article-detail-meta').textContent = `${article.author || 'Admin'} • ${article.category || 'Umum'} • ${article.created_at ? new Date(article.created_at).toLocaleDateString('id-ID') : 'Baru'}`;
@@ -1740,9 +1687,7 @@
                 content: document.getElementById('article-content').value
             };
 
-            if (!articleData.title || !articleData.content) {
-                return;
-            }
+            if (!articleData.title || !articleData.content) return;
 
             try {
                 let url = `${BASE_API_URL}/articles`;
@@ -1774,8 +1719,7 @@
 
         async function deleteArticle(id) {
             if (!isAdmin()) return;
-            if (!confirm('Hapus artikel ini?')) return;
-
+            // LANGSUNG HAPUS TANPA KONFIRMASI
             try {
                 const res = await fetch(`${BASE_API_URL}/articles/${id}`, {
                     method: 'DELETE',
@@ -1877,7 +1821,6 @@
 
         function deleteArticleComment(articleId, commentId) {
             if (!isAdmin()) return;
-            if (!confirm('Hapus komentar ini?')) return;
             const comments = getArticleComments(articleId).filter(c => c.id !== commentId);
             saveArticleComments(articleId, comments);
             renderArticleComments(articleId);
@@ -1907,7 +1850,6 @@
 
         function renderExams() {
             const grid = document.getElementById('exams-grid');
-            const count = document.getElementById('exam-count');
             if (!grid) return;
 
             const searchTerm = document.getElementById('search-exams')?.value?.toLowerCase() || '';
@@ -1916,8 +1858,6 @@
                 const matchesSearch = e.title?.toLowerCase().includes(searchTerm);
                 return matchesSearch;
             });
-
-            if (count) count.textContent = filtered.length;
 
             if (filtered.length === 0) {
                 grid.innerHTML = '<div class="col-span-full empty-state"><i class="fas fa-search"></i><p>Tidak ada ujian ditemukan</p></div>';
@@ -2004,9 +1944,7 @@
 
         function removeQuestionItem(btn) {
             const container = document.getElementById('questions-list-container');
-            if (container.children.length <= 1) {
-                return;
-            }
+            if (container.children.length <= 1) return;
             btn.closest('.question-item-card').remove();
             updateQuestionNumbers();
         }
@@ -2031,7 +1969,6 @@
 
             document.getElementById('questions-list-container').innerHTML = "";
             addQuestionItem();
-
             openModal('create-exam');
         }
 
@@ -2090,9 +2027,7 @@
                 questions: questions
             };
 
-            if (!examData.title || questions.length === 0) {
-                return;
-            }
+            if (!examData.title || questions.length === 0) return;
 
             try {
                 let url = `${BASE_API_URL}/exams`;
@@ -2124,8 +2059,7 @@
 
         async function deleteExam(id) {
             if (!isAdmin()) return;
-            if (!confirm('Hapus ujian ini?')) return;
-
+            // LANGSUNG HAPUS TANPA KONFIRMASI
             try {
                 const res = await fetch(`${BASE_API_URL}/exams/${id}`, {
                     method: 'DELETE',
@@ -2156,9 +2090,7 @@
 
         function startExam(examId) {
             const exam = examsData.find(e => e.id === examId);
-            if (!exam || !exam.questions || exam.questions.length === 0) {
-                return;
-            }
+            if (!exam || !exam.questions || exam.questions.length === 0) return;
 
             currentExam = exam;
             currentQuestionIndex = 0;
@@ -2279,19 +2211,17 @@
         }
 
         function konfirmasiKeluarUjian() {
-            if (confirm("Yakin ingin keluar? Progres pengerjaan akan hilang.")) {
-                closeModal('exam-player');
-                document.body.classList.remove('exam-active');
-                if (examInterval) {
-                    clearInterval(examInterval);
-                    examInterval = null;
-                }
-                currentExam = null;
-                userAnswers = {};
-                currentQuestionIndex = 0;
-                examTimeRemaining = 0;
-                examStartTime = null;
+            closeModal('exam-player');
+            document.body.classList.remove('exam-active');
+            if (examInterval) {
+                clearInterval(examInterval);
+                examInterval = null;
             }
+            currentExam = null;
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            examTimeRemaining = 0;
+            examStartTime = null;
         }
 
         async function submitExam() {
@@ -2419,7 +2349,6 @@
             let bestScore = 0;
             let totalTime = 0;
 
-            // Filter hasil berdasarkan user (non-admin hanya lihat milik sendiri)
             const userResults = isAdmin() ? resultsData : resultsData.filter(r => r.userId === currentUser?.userId);
 
             if (userResults.length > 0) {
@@ -2466,8 +2395,7 @@
 
         function deleteResult(resultId) {
             if (!isAdmin()) return;
-            if (!confirm('Hapus entri riwayat ujian ini?')) return;
-
+            // LANGSUNG HAPUS TANPA KONFIRMASI
             resultsData = resultsData.filter(r => r.id !== resultId);
             localStorage.setItem(STORAGE_RESULTS, JSON.stringify(resultsData));
             renderResults();
@@ -2476,8 +2404,7 @@
 
         function hapusSemuaRiwayat() {
             if (!isAdmin()) return;
-            if (!confirm('Yakin ingin menghapus SEMUA riwayat ujian? Tindakan ini tidak bisa dibatalkan!')) return;
-            
+            // LANGSUNG HAPUS SEMUA TANPA KONFIRMASI
             resultsData = [];
             localStorage.setItem(STORAGE_RESULTS, JSON.stringify(resultsData));
             renderResults();
@@ -2506,24 +2433,14 @@
 
         // ========== INIT ==========
         function init() {
-            // Load results from localStorage first
             resultsData = getStoredResults();
-            
             initUsers();
             loadSession();
             applySavedTheme();
-            
-            // Update UI with current data
             updateAuthUI();
-            
-            // Update home stats immediately from localStorage
             updateHomeStats();
-            
-            // Load data from API
             fetchArticles();
             fetchExams();
-            
-            // Show home section
             switchSection('home');
         }
 
@@ -2549,7 +2466,6 @@
             });
         });
 
-        // Close auth modal on ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const modals = document.querySelectorAll('.modal-overlay.active');
